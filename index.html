@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rider HUD - 라이더 데이터 주권의 시작</title>
+    <style>
+        /* 기본 스타일 및 다크 테마 */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', -apple-system, sans-serif; }
+        body { background-color: #08080A; color: #FFFFFF; min-height: 100vh; overflow-x: hidden; }
+
+        /* 네온 & 그라데이션 포인트 */
+        :root {
+            --neon-green: #39FF14;
+            --purple-glow: rgba(138, 43, 226, 0.3);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        /* 헤더 영역 */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--glass-border);
+            background: rgba(8, 8, 10, 0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; }
+        .logo span { color: var(--neon-green); }
+
+        /* 메인 히어로 섹션 */
+        .hero {
+            text-align: center;
+            padding: 5rem 1rem 3rem;
+            background: radial-gradient(circle at top, var(--purple-glow), transparent 60%);
+        }
+
+        .hero h1 { font-size: 2.8rem; font-weight: 800; margin-bottom: 1rem; letter-spacing: -1px; line-height: 1.2; }
+        .hero p { color: #A0A0A5; font-size: 1.1rem; margin-bottom: 2rem; }
+
+        /* 대시보드 / 가상 HUD 영역 */
+        .hud-container {
+            max-width: 800px;
+            margin: 0 auto 5rem;
+            padding: 0 1rem;
+        }
+
+        /* 크리스탈/글래스모피즘 카드 */
+        .glass-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(16px);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        /* 타이머 엔진 UI */
+        .timer-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .timer-box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .timer-label { font-size: 0.9rem; color: #8A8A93; margin-bottom: 0.5rem; font-weight: 600; }
+        .timer-display { font-size: 2.5rem; font-weight: 700; color: var(--neon-green); font-variant-numeric: tabular-nums; margin-bottom: 1rem; }
+
+        /* 제어 버튼 */
+        .btn-group { display: flex; gap: 0.5rem; justify-content: center; }
+        button {
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-start { background-color: var(--neon-green); color: #000; }
+        .btn-reset { background-color: rgba(255,255,255,0.1); color: #FFF; }
+        button:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        /* 비전 세션 */
+        .vision-section {
+            max-width: 800px;
+            margin: 0 auto 5rem;
+            padding: 0 1rem;
+        }
+        .vision-card {
+            border-left: 4px solid var(--neon-green);
+            background: rgba(255,255,255,0.01);
+            padding: 2rem;
+            border-radius: 0 16px 16px 0;
+        }
+        .vision-card h3 { font-size: 1.3rem; margin-bottom: 0.8rem; }
+        .vision-card ul { list-style: none; color: #A0A0A5; line-height: 1.6; }
+        .vision-card li { margin-bottom: 0.5rem; position: relative; padding-left: 15px; }
+        .vision-card li::before { content: "•"; color: var(--neon-green); position: absolute; left: 0; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">RIDER <span>HUD</span></div>
+        <div class="status">Beta Version v2.0</div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <h1>내가 흘린 땀의 가치,<br>플랫폼이 아닌 내가 소유합니다</h1>
+            <p>Rider HUD는 알고리즘의 블랙박스를 열어 투명한 노동 데이터를 실현합니다.</p>
+        </section>
+
+        <section class="hud-container">
+            <div class="glass-card">
+                <h2 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem;">멀티 모드 타이머 엔진</h2>
+                <p style="color: #8A8A93; font-size: 0.9rem;">주행 및 대기 동선을 기록하여 생산성을 수치화합니다.</p>
+                
+                <div class="timer-section">
+                    <div class="timer-box">
+                        <div class="timer-label">배달 주행 타이머</div>
+                        <div class="timer-display" id="drive-display">00:00:00</div>
+                        <div class="btn-group">
+                            <button class="btn-start" id="drive-btn" onclick="toggleTimer('drive')">시작</button>
+                            <button class="btn-reset" onclick="resetTimer('drive')">리셋</button>
+                        </div>
+                    </div>
+                    <div class="timer-box">
+                        <div class="timer-label">콜 대기 타이머</div>
+                        <div class="timer-display" id="wait-display">00:00:00</div>
+                        <div class="btn-group">
+                            <button class="btn-start" id="wait-btn" onclick="toggleTimer('wait')">시작</button>
+                            <button class="btn-reset" onclick="resetTimer('wait')">리셋</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="vision-section">
+            <div class="vision-card">
+                <h3>노동 데이터 주권의 실현</h3>
+                <ul>
+                    <li><strong>데이터 소유권의 이전:</strong> 이동 동선과 땀의 가치를 플랫폼이 아닌 라이더가 온전히 소유합니다.</li>
+                    <li><strong>불투명성에 대한 대항:</strong> 플랫폼 알고리즘 블랙박스를 투명하게 시각화하여 플랫폼 의존도를 낮춥니다.</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // 엔진 상태 및 내부 변수 분리 (플래그 충돌 원천 차단 구조)
+        const timers = {
+            drive: { seconds: 0, interval: null, running: false },
+            wait: { seconds: 0, interval: null, running: false }
+        };
+
+        function formatTime(totalSeconds) {
+            const hrs = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+            const mins = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+            const secs = String(totalSeconds % 60).padStart(2, '0');
+            return `${hrs}:${mins}:${secs}`;
+        }
+
+        function toggleTimer(type) {
+            const t = timers[type];
+            const btn = document.getElementById(`${type}-btn`);
+            const display = document.getElementById(`${type}-display`);
+
+            if (!t.running) {
+                // 루프 플래그 활성화 및 다른 영역 간섭 차단
+                t.running = true;
+                btn.innerText = "정지";
+                btn.style.backgroundColor = "#FF3B30";
+                btn.style.color = "#FFF";
+                
+                t.interval = setInterval(() => {
+                    t.seconds++;
+                    display.innerText = formatTime(t.seconds);
+                }, 1000);
+            } else {
+                // 정지 및 인터벌 클리어
+                t.running = false;
+                btn.innerText = "시작";
+                btn.style.backgroundColor = "var(--neon-green)";
+                btn.style.color = "#000";
+                clearInterval(t.interval);
+                t.interval = null;
+            }
+        }
+
+        function resetTimer(type) {
+            const t = timers[type];
+            // 1. 루프 상태 강제 클리어 및 플래그 초기화
+            t.running = false;
+            if (t.interval) {
+                clearInterval(t.interval);
+                t.interval = null;
+            }
+            // 2. 값 0으로 세팅 후 UI 갱신 (루프 오버라이트 현상 수정)
+            t.seconds = 0;
+            document.getElementById(`${type}-display`).innerText = "00:00:00";
+            
+            const btn = document.getElementById(`${type}-btn`);
+            btn.innerText = "시작";
+            btn.style.backgroundColor = "var(--neon-green)";
+            btn.style.color = "#000";
+        }
+    </script>
+</body>
+</html>
