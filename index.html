@@ -1,673 +1,471 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rider HUD — 라이더 개인 운영체제</title>
-<meta name="description" content="라이더의 경험을 데이터로 기록하고 스스로 분석·활용할 수 있게 만드는 개인형 라이더 운영체제">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;700&family=Noto+Sans+KR:wght@300;400;700;900&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --green: #00ff88;
-    --bg: #000;
-    --bg2: #060606;
-    --text: #fff;
-    --sub: #aaa;
-    --dim: #777;
-    --off: #444;
-    --border: #111;
-  }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  html { scroll-behavior:smooth; }
-  body { background:var(--bg); color:var(--text); font-family:'Noto Sans KR',sans-serif; overflow-x:hidden; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RIDER HUD — 라이더 개인 운영체제</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <style>
+        :root {
+            --bg-color: #08080A;
+            --purple-glow: linear-gradient(135deg, #6d28d9 0%, #4c1d95 100%);
+            --glass-bg: rgba(13, 13, 18, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.05);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --accent-green: #10b981;
+        }
 
-  /* NAV */
-  nav {
-    position:fixed; top:0; left:0; right:0; z-index:100;
-    padding:18px 48px;
-    display:flex; justify-content:space-between; align-items:center;
-    background:rgba(0,0,0,0.95); backdrop-filter:blur(20px);
-    border-bottom:1px solid var(--border);
-  }
-  .nav-logo img { height:32px; }
-  .nav-menu { display:flex; gap:36px; list-style:none; align-items:center; }
-  .nav-menu a {
-    font-family:'IBM Plex Mono',monospace; font-size:0.7rem; letter-spacing:2px;
-    color:var(--dim); text-decoration:none; transition:color 0.2s;
-  }
-  .nav-menu a:hover { color:var(--text); }
-  .nav-cta { background:var(--green)!important; color:#000!important; padding:10px 24px; font-weight:700!important; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
 
-  /* HERO */
-  .hero {
-    min-height:100vh; display:flex; flex-direction:column;
-    justify-content:center; padding:140px 48px 100px;
-    position:relative; overflow:hidden;
-  }
-  .hero-grid {
-    position:absolute; inset:0;
-    background-image:
-      linear-gradient(rgba(0,255,136,0.025) 1px,transparent 1px),
-      linear-gradient(90deg,rgba(0,255,136,0.025) 1px,transparent 1px);
-    background-size:64px 64px; pointer-events:none;
-  }
-  .hero-glow {
-    position:absolute; top:10%; left:-5%;
-    width:60vw; height:70vh;
-    background:radial-gradient(ellipse,rgba(0,255,136,0.04) 0%,transparent 65%);
-    pointer-events:none;
-  }
-  .hero-content { position:relative; max-width:760px; }
-  .hero-eyebrow {
-    font-family:'IBM Plex Mono',monospace; font-size:0.65rem; letter-spacing:5px;
-    color:var(--green); margin-bottom:28px;
-    opacity:0; animation:up 0.7s 0.2s forwards;
-  }
-  .hero-h1 {
-    font-size:clamp(2.2rem,5vw,3.8rem); font-weight:900; line-height:1.2;
-    margin-bottom:28px; opacity:0; animation:up 0.7s 0.35s forwards;
-  }
-  .hero-h1 em { color:var(--green); font-style:normal; }
-  .hero-desc {
-    font-size:1rem; color:var(--sub); line-height:1.9; font-weight:300;
-    max-width:520px; margin-bottom:52px;
-    opacity:0; animation:up 0.7s 0.5s forwards;
-  }
-  .hero-desc b { color:var(--text); font-weight:700; }
-  .hero-actions {
-    display:flex; gap:16px; flex-wrap:wrap;
-    opacity:0; animation:up 0.7s 0.65s forwards;
-  }
-  .btn {
-    font-family:'IBM Plex Mono',monospace; font-size:0.8rem; letter-spacing:2px;
-    text-decoration:none; display:inline-block; padding:16px 44px; transition:all 0.2s;
-  }
-  .btn-green { background:var(--green); color:#000; font-weight:700; }
-  .btn-green:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(0,255,136,0.25); }
-  .btn-ghost { border:1px solid #333; color:var(--dim); }
-  .btn-ghost:hover { border-color:#666; color:var(--text); }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
 
-  /* PROBLEM */
-  .problem { padding:120px 48px; background:var(--bg2); border-top:1px solid var(--border); }
-  .problem-inner { max-width:1000px; margin:0 auto; }
-  .section-label {
-    font-family:'IBM Plex Mono',monospace; font-size:0.62rem; letter-spacing:5px;
-    color:var(--off); margin-bottom:20px;
-  }
-  .section-title { font-size:clamp(1.8rem,3.5vw,2.8rem); font-weight:900; line-height:1.3; margin-bottom:20px; }
-  .section-title em { color:var(--green); font-style:normal; }
-  .section-desc { font-size:0.95rem; color:var(--sub); line-height:1.9; font-weight:300; max-width:640px; margin-bottom:56px; }
-  .problem-grid {
-    display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:1px; background:var(--border); border:1px solid var(--border);
-  }
-  .problem-item { background:var(--bg2); padding:36px 32px; }
-  .problem-q { font-size:0.85rem; color:var(--dim); line-height:1.7; font-style:italic; font-weight:300; padding-bottom:16px; margin-bottom:16px; border-bottom:1px solid var(--border); }
-  .problem-a { font-size:0.88rem; color:var(--sub); line-height:1.8; }
-  .problem-a b { color:var(--green); font-weight:700; }
+        /* 배경 네온 그라데이션 광원 배치 */
+        .ambient-glow {
+            position: fixed;
+            top: -200px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(109, 40, 217, 0.15) 0%, rgba(0,0,0,0) 70%);
+            z-index: -1;
+            pointer-events: none;
+        }
 
-  /* SOLUTION */
-  .solution { padding:120px 48px; border-top:1px solid var(--border); }
-  .solution-inner { max-width:1000px; margin:0 auto; }
-  .solution-stmt {
-    font-size:clamp(1.2rem,2.5vw,1.7rem); font-weight:700; line-height:1.8;
-    color:var(--sub); border-left:3px solid var(--green);
-    padding-left:32px; margin-bottom:0; max-width:700px;
-  }
-  .solution-stmt b { color:var(--text); }
+        /* 내비게이션 바 */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
 
-  /* MODULES */
-  .modules { border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
-  .module {
-    display:grid; grid-template-columns:1fr 1fr;
-    gap:1px; background:var(--border);
-    border-bottom:1px solid var(--border);
-    min-height:520px;
-  }
-  .module:last-child { border-bottom:none; }
-  .module.reverse { direction:rtl; }
-  .module.reverse > * { direction:ltr; }
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
 
-  .module-visual {
-    background:var(--bg2);
-    display:flex; align-items:center; justify-content:center;
-    padding:60px 48px; position:relative; overflow:hidden;
-  }
+        .logo span {
+            color: var(--accent-green);
+        }
 
-  /* ── HUD 목업 ── */
-  .hud-mockup {
-    width:100%; max-width:320px;
-    background:#0d0d0d; border-radius:16px;
-    border:1px solid #1e1e1e; padding:24px;
-    box-shadow:0 24px 64px rgba(0,0,0,0.8), 0 0 0 1px #111;
-    position:relative;
-  }
-  .hud-mockup::before {
-    content:''; position:absolute; inset:0; border-radius:16px;
-    background:radial-gradient(ellipse at 50% 0%, rgba(0,255,136,0.06) 0%, transparent 60%);
-    pointer-events:none;
-  }
-  .hm-header { text-align:center; margin-bottom:20px; }
-  .hm-title { font-family:'IBM Plex Mono',monospace; color:var(--green); font-size:1.1rem; letter-spacing:4px; font-weight:700; }
-  .hm-date { font-size:0.65rem; color:var(--off); margin-top:4px; }
-  .hm-alert {
-    background:#0a1f0a; border:1px solid rgba(0,255,136,0.3);
-    border-radius:10px; padding:16px 20px; margin-bottom:16px;
-    animation:pulse 2s infinite;
-  }
-  @keyframes pulse {
-    0%,100% { border-color:rgba(0,255,136,0.3); }
-    50% { border-color:rgba(0,255,136,0.8); box-shadow:0 0 16px rgba(0,255,136,0.15); }
-  }
-  .hm-alert-label { font-size:0.6rem; letter-spacing:3px; color:var(--green); margin-bottom:8px; font-family:'IBM Plex Mono',monospace; }
-  .hm-alert-text { font-size:1rem; font-weight:700; color:#fff; line-height:1.5; }
-  .hm-alert-sub { font-size:0.7rem; color:var(--dim); margin-top:4px; }
-  .hm-cycle {
-    display:grid; grid-template-columns:repeat(3,1fr);
-    gap:8px; margin-bottom:16px;
-  }
-  .hm-btn {
-    padding:12px 8px; border-radius:8px; text-align:center;
-    font-size:0.75rem; font-weight:700; border:1px solid;
-  }
-  .hm-btn.arrived { background:#1a1a0a; border-color:#ffaa00; color:#ffaa00; }
-  .hm-btn.pickup { background:#0a1a0a; border-color:var(--green); color:var(--green); }
-  .hm-btn.drop { background:#1a0a0a; border-color:#ff4444; color:#ff4444; }
-  .hm-floor { display:flex; gap:6px; }
-  .hm-floor-btn {
-    flex:1; padding:8px; border-radius:6px; text-align:center;
-    font-size:0.7rem; font-weight:700; background:#1a1a1a;
-    border:1px solid #222; color:var(--dim);
-    font-family:'IBM Plex Mono',monospace;
-  }
-  .hm-floor-btn.active { background:#0d2a0d; border-color:var(--green); color:var(--green); }
+        .version-badge {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            border: 1px solid var(--glass-border);
+        }
 
-  /* ── Manager 목업 ── */
-  .mgr-mockup {
-    width:100%; max-width:320px;
-    background:#0d0d0d; border-radius:16px;
-    border:1px solid #1e1e1e; padding:24px;
-    box-shadow:0 24px 64px rgba(0,0,0,0.8);
-  }
-  .mgr-header { margin-bottom:20px; }
-  .mgr-title { font-family:'IBM Plex Mono',monospace; color:var(--green); font-size:0.9rem; letter-spacing:3px; font-weight:700; }
-  .mgr-main {
-    background:#0a1f0a; border:1px solid rgba(0,255,136,0.2);
-    border-radius:12px; padding:24px; margin-bottom:16px; text-align:center;
-  }
-  .mgr-main-label { font-size:0.65rem; letter-spacing:3px; color:var(--green); margin-bottom:8px; font-family:'IBM Plex Mono',monospace; }
-  .mgr-main-value { font-size:2.8rem; font-weight:900; color:var(--green); font-family:'IBM Plex Mono',monospace; letter-spacing:-1px; }
-  .mgr-main-unit { font-size:1rem; color:var(--dim); }
-  .mgr-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:16px; }
-  .mgr-cell {
-    background:#111; border-radius:8px; padding:14px;
-    border:1px solid #1a1a1a;
-  }
-  .mgr-cell-label { font-size:0.58rem; color:var(--off); margin-bottom:6px; letter-spacing:1px; }
-  .mgr-cell-value { font-size:1rem; font-weight:700; color:var(--sub); font-family:'IBM Plex Mono',monospace; }
-  .mgr-cell-value.green { color:var(--green); }
-  .mgr-cell-value.orange { color:#ffaa00; }
-  .mgr-platforms { display:flex; gap:6px; }
-  .mgr-platform {
-    flex:1; padding:8px 4px; border-radius:6px; text-align:center;
-    font-size:0.62rem; font-weight:700; border:1px solid #1a1a1a;
-    background:#111; color:var(--off);
-  }
-  .mgr-platform.active { background:#0a1f0a; border-color:var(--green); color:var(--green); }
+        /* 메인 히어로 섹션 */
+        header {
+            max-width: 800px;
+            margin: 5rem auto 3rem auto;
+            text-align: center;
+            padding: 0 1rem;
+        }
 
-  /* ── Heatmap 목업 ── */
-  .hmp-mockup {
-    width:100%; max-width:320px;
-    background:#0d0d0d; border-radius:16px;
-    border:1px solid #1e1e1e; overflow:hidden;
-    box-shadow:0 24px 64px rgba(0,0,0,0.8);
-  }
-  .hmp-header { padding:16px 20px; border-bottom:1px solid #1a1a1a; display:flex; justify-content:space-between; align-items:center; }
-  .hmp-title { font-family:'IBM Plex Mono',monospace; color:var(--green); font-size:0.75rem; letter-spacing:2px; font-weight:700; }
-  .hmp-days { display:flex; gap:4px; }
-  .hmp-day {
-    width:28px; height:28px; border-radius:6px; display:flex;
-    align-items:center; justify-content:center;
-    font-size:0.65rem; font-weight:700; background:#1a1a1a; color:var(--off);
-  }
-  .hmp-day.active { background:#0a1f0a; border:1px solid var(--green); color:var(--green); }
-  .hmp-map {
-    height:200px; position:relative; overflow:hidden;
-    background:#0a0f0a;
-  }
-  /* 지도 격자 */
-  .hmp-map::before {
-    content:''; position:absolute; inset:0;
-    background-image:
-      linear-gradient(rgba(0,255,136,0.04) 1px,transparent 1px),
-      linear-gradient(90deg,rgba(0,255,136,0.04) 1px,transparent 1px);
-    background-size:24px 24px;
-  }
-  .hmp-zone {
-    position:absolute; border-radius:50%;
-    filter:blur(20px);
-  }
-  .hmp-hot1 { width:100px; height:100px; background:rgba(255,60,60,0.6); top:30%; left:35%; }
-  .hmp-hot2 { width:60px; height:60px; background:rgba(255,120,0,0.5); top:15%; left:55%; }
-  .hmp-warm { width:80px; height:80px; background:rgba(255,200,0,0.3); top:50%; left:20%; }
-  .hmp-cold { width:70px; height:70px; background:rgba(0,100,255,0.3); top:10%; left:10%; }
-  .hmp-dot {
-    position:absolute; width:6px; height:6px;
-    border-radius:50%; background:var(--green);
-    box-shadow:0 0 6px var(--green);
-  }
-  .hmp-you { top:45%; left:48%; }
-  .hmp-legend { padding:12px 16px; display:flex; gap:12px; align-items:center; border-top:1px solid #1a1a1a; }
-  .hmp-legend-item { display:flex; align-items:center; gap:6px; font-size:0.6rem; color:var(--dim); font-family:'IBM Plex Mono',monospace; }
-  .hmp-dot-hot { width:8px; height:8px; border-radius:50%; background:#ff3c3c; }
-  .hmp-dot-cold { width:8px; height:8px; border-radius:50%; background:#3c6aff; }
-  .hmp-dot-me { width:8px; height:8px; border-radius:50%; background:var(--green); box-shadow:0 0 6px var(--green); }
-  .hmp-times { display:flex; gap:4px; padding:12px 16px; border-top:1px solid #1a1a1a; }
-  .hmp-time {
-    flex:1; padding:6px 4px; border-radius:6px; text-align:center;
-    font-size:0.58rem; font-family:'IBM Plex Mono',monospace;
-    background:#1a1a1a; color:var(--off); border:1px solid transparent;
-  }
-  .hmp-time.active { background:#0a1f0a; border-color:var(--green); color:var(--green); }
+        .sub-philosophic {
+            font-size: 1.1rem;
+            color: var(--accent-green);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            letter-spacing: 2px;
+        }
 
-  /* MODULE INFO */
-  .module-info {
-    background:var(--bg); padding:60px 56px;
-    display:flex; flex-direction:column; justify-content:center;
-  }
-  .mod-num { font-family:'IBM Plex Mono',monospace; font-size:0.58rem; letter-spacing:3px; color:var(--off); margin-bottom:16px; }
-  .mod-tag { font-family:'IBM Plex Mono',monospace; font-size:0.65rem; letter-spacing:4px; color:var(--green); margin-bottom:16px; }
-  .mod-title { font-size:clamp(1.5rem,2.5vw,2rem); font-weight:900; line-height:1.3; margin-bottom:24px; }
-  .mod-problem {
-    font-size:0.85rem; color:var(--dim); line-height:1.8;
-    font-style:italic; font-weight:300;
-    padding:16px 20px; background:var(--bg2);
-    border-left:2px solid #333; margin-bottom:20px;
-  }
-  .mod-solution { font-size:0.92rem; color:var(--sub); line-height:1.8; font-weight:300; margin-bottom:32px; }
-  .mod-solution b { color:var(--text); font-weight:700; }
-  .mod-features { display:flex; flex-direction:column; gap:8px; margin-bottom:36px; }
-  .mod-feature {
-    display:flex; align-items:center; gap:10px;
-    font-size:0.8rem; color:var(--dim);
-  }
-  .mod-feature::before { content:'→'; color:var(--green); font-family:'IBM Plex Mono',monospace; font-size:0.7rem; }
-  .mod-link {
-    font-family:'IBM Plex Mono',monospace; font-size:0.7rem; letter-spacing:2px;
-    color:var(--off); text-decoration:none; transition:color 0.2s;
-    display:inline-flex; align-items:center; gap:8px;
-  }
-  .mod-link:hover { color:var(--green); }
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 1.5rem;
+            line-height: 1.3;
+        }
 
-  /* MANIFESTO */
-  .manifesto {
-    padding:160px 48px; display:flex; justify-content:center;
-    position:relative; overflow:hidden; border-top:1px solid var(--border);
-  }
-  .manifesto::before {
-    content:''; position:absolute; inset:0;
-    background:radial-gradient(ellipse at 50% 50%,rgba(0,255,136,0.03) 0%,transparent 60%);
-    pointer-events:none;
-  }
-  .manifesto-inner { max-width:720px; position:relative; }
-  .manifesto-label { font-family:'IBM Plex Mono',monospace; font-size:0.6rem; letter-spacing:5px; color:var(--off); margin-bottom:56px; text-align:center; }
-  .manifesto-quote { font-size:clamp(1.5rem,3vw,2.2rem); font-weight:900; line-height:1.6; border-left:2px solid var(--green); padding-left:40px; margin-bottom:48px; }
-  .manifesto-list { padding-left:42px; display:grid; grid-template-columns:1fr 1fr; gap:14px 32px; }
-  .manifesto-item { font-family:'IBM Plex Mono',monospace; font-size:0.68rem; letter-spacing:1px; color:var(--dim); display:flex; align-items:center; gap:10px; }
-  .manifesto-item::before { content:'—'; color:var(--green); }
+        .hero-desc {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 2rem auto;
+        }
 
-  /* ROADMAP */
-  .roadmap { padding:100px 48px; background:var(--bg2); border-top:1px solid var(--border); }
-  .roadmap-inner { max-width:1000px; margin:0 auto; }
-  .roadmap-steps { display:flex; gap:1px; background:var(--border); border:1px solid var(--border); overflow-x:auto; margin-top:48px; }
-  .roadmap-step { background:var(--bg2); min-width:180px; padding:32px 28px; flex:1; position:relative; }
-  .roadmap-step.on { background:#050505; }
-  .roadmap-step.on::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--green); }
-  .step-num { font-family:'IBM Plex Mono',monospace; font-size:0.55rem; letter-spacing:2px; color:var(--off); margin-bottom:12px; }
-  .step-name { font-size:0.9rem; font-weight:700; color:var(--text); margin-bottom:8px; }
-  .step-desc { font-size:0.72rem; color:var(--dim); line-height:1.6; font-weight:300; }
-  .step-badge { font-family:'IBM Plex Mono',monospace; font-size:0.55rem; letter-spacing:1px; margin-top:16px; display:inline-block; padding:3px 8px; }
-  .badge-on { color:var(--green); border:1px solid rgba(0,255,136,0.25); }
-  .badge-dev { color:#777; border:1px solid #222; }
-  .badge-next { color:var(--off); border:1px solid #1a1a1a; }
-  .roadmap-more { margin-top:28px; text-align:right; }
-  .roadmap-more a { font-family:'IBM Plex Mono',monospace; font-size:0.65rem; letter-spacing:2px; color:var(--dim); text-decoration:none; transition:color 0.2s; }
-  .roadmap-more a:hover { color:var(--green); }
+        /* 핵심 모듈: 멀티 모드 타이머 엔진 (유리모피즘) */
+        .timer-container {
+            max-width: 700px;
+            margin: 0 auto 5rem auto;
+            padding: 2rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
 
-  /* CTA */
-  .cta { padding:160px 48px; text-align:center; border-top:1px solid var(--border); position:relative; overflow:hidden; }
-  .cta::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 50% 100%,rgba(0,255,136,0.04) 0%,transparent 55%); }
-  .cta-inner { position:relative; }
-  .cta-label { font-family:'IBM Plex Mono',monospace; font-size:0.6rem; letter-spacing:5px; color:var(--off); margin-bottom:24px; }
-  .cta-title { font-size:clamp(2rem,4.5vw,3.2rem); font-weight:900; margin-bottom:16px; }
-  .cta-sub { color:var(--dim); font-size:0.9rem; font-weight:300; margin-bottom:56px; line-height:1.8; }
-  .cta-links { margin-top:48px; display:flex; gap:40px; justify-content:center; flex-wrap:wrap; }
-  .cta-links a { font-family:'IBM Plex Mono',monospace; font-size:0.65rem; letter-spacing:2px; color:var(--off); text-decoration:none; transition:color 0.2s; }
-  .cta-links a:hover { color:var(--dim); }
+        .timer-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
 
-  /* FOOTER */
-  footer { padding:36px 48px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; }
-  .foot-logo { font-family:'IBM Plex Mono',monospace; font-size:0.75rem; letter-spacing:4px; color:var(--off); }
-  .foot-nav { display:flex; gap:28px; }
-  .foot-nav a { font-family:'IBM Plex Mono',monospace; font-size:0.6rem; letter-spacing:1px; color:#222; text-decoration:none; transition:color 0.2s; }
-  .foot-nav a:hover { color:var(--dim); }
-  .foot-copy { font-family:'IBM Plex Mono',monospace; font-size:0.6rem; color:#222; }
+        @media (max-width: 600px) {
+            .timer-grid { grid-template-columns: 1fr; }
+            h1 { font-size: 2rem; }
+        }
 
-  @keyframes up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
-  .reveal { opacity:0; transform:translateY(28px); transition:opacity 0.7s,transform 0.7s; }
-  .reveal.on { opacity:1; transform:translateY(0); }
+        .timer-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+        }
 
-  @media(max-width:900px){
-    nav{padding:16px 20px;} .nav-menu{display:none;}
-    .hero{padding:100px 20px 80px;}
-    .problem{padding:80px 20px;}
-    .solution{padding:80px 20px;}
-    .module{grid-template-columns:1fr;}
-    .module.reverse{direction:ltr;}
-    .module-info{padding:40px 28px;}
-    .manifesto{padding:100px 20px;} .manifesto-list{grid-template-columns:1fr;}
-    .roadmap{padding:80px 20px;}
-    .cta{padding:100px 20px;}
-    footer{padding:28px 20px;flex-direction:column;align-items:flex-start;}
-  }
-</style>
+        .timer-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+        }
+
+        .timer-display {
+            font-size: 2.25rem;
+            font-family: monospace;
+            font-weight: 700;
+            color: var(--accent-green);
+            margin-bottom: 1rem;
+            letter-spacing: 1px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        button {
+            padding: 0.5rem 1.25rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-start {
+            background-color: var(--accent-green);
+            color: #000;
+        }
+
+        .btn-start:hover { opacity: 0.9; }
+
+        .btn-reset {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+        }
+
+        .btn-reset:hover { background-color: rgba(255, 255, 255, 0.15); }
+
+        /* 철학 선언문 섹션 */
+        .manifesto-section {
+            max-width: 900px;
+            margin: 0 auto 6rem auto;
+            padding: 0 1rem;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin-bottom: 3rem;
+            letter-spacing: -0.5px;
+        }
+
+        .manifesto-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .manifesto-grid { grid-template-columns: 1fr; }
+        }
+
+        .manifesto-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 2rem;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .manifesto-card h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .manifesto-card h3::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: var(--purple-glow);
+            display: inline-block;
+            border-radius: 2px;
+        }
+
+        .manifesto-card p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* HUD 로드맵 (진화 단계) 섹션 */
+        .roadmap-section {
+            max-width: 900px;
+            margin: 0 auto 8rem auto;
+            padding: 0 1rem;
+        }
+
+        .roadmap-timeline {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .roadmap-card {
+            background: rgba(13, 13, 18, 0.4);
+            border: 1px solid var(--glass-border);
+            padding: 1.5rem 2rem;
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: border 0.3s ease;
+        }
+
+        .roadmap-card:hover {
+            border-color: rgba(109, 40, 217, 0.4);
+        }
+
+        .roadmap-left h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .roadmap-left p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .roadmap-badge {
+            background: var(--purple-glow);
+            padding: 0.35rem 1rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        @media (max-width: 600px) {
+            .roadmap-card { flex-direction: column; align-items: flex-start; gap: 1rem; }
+        }
+
+        /* 푸터 명언 구조 */
+        footer {
+            text-align: center;
+            padding: 5rem 1rem;
+            border-top: 1px solid var(--glass-border);
+            background: rgba(5, 5, 7, 0.8);
+        }
+
+        .footer-quote {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            letter-spacing: -0.5px;
+        }
+
+        .footer-sub {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+    </style>
 </head>
 <body>
 
-<nav>
-  <div class="nav-logo"><img src="logo.png" alt="Rider HUD"></div>
-  <ul class="nav-menu">
-    <li><a href="philosophy.html">철학</a></li>
-    <li><a href="#modules">기능</a></li>
-    <li><a href="roadmap.html">로드맵</a></li>
-    <li><a href="install.html">설치</a></li>
-    <li><a href="https://riderhud.kr" class="nav-cta">앱 열기</a></li>
-  </ul>
-</nav>
+    <div class="ambient-glow"></div>
 
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-grid"></div>
-  <div class="hero-glow"></div>
-  <div class="hero-content">
-    <div class="hero-eyebrow">PERSONAL RIDER OS · DATA SOVEREIGNTY</div>
-    <h1 class="hero-h1">내가 흘린 땀의 가치,<br><em>플랫폼이 아닌<br>내가 소유합니다</em></h1>
-    <p class="hero-desc">
-      라이더의 경험을 데이터로 기록하고<br>
-      스스로 분석하고 활용할 수 있게 만드는<br>
-      <b>개인형 라이더 운영체제</b>
-    </p>
-    <div class="hero-actions">
-      <a href="https://riderhud.kr" class="btn btn-green">지금 설치하기 →</a>
-      <a href="#problem" class="btn btn-ghost">왜 필요한가</a>
-    </div>
-  </div>
-</section>
+    <nav>
+        <div class="logo">RIDER <span>HUD</span></div>
+        <div class="version-badge">Personal OS v1.0</div>
+    </nav>
 
-<!-- PROBLEM -->
-<section class="problem" id="problem">
-  <div class="problem-inner">
-    <div class="section-label reveal">THE PROBLEM</div>
-    <h2 class="section-title reveal">라이더는 <em>데이터 없이</em> 일합니다</h2>
-    <p class="section-desc reveal">
-      플랫폼은 라이더의 이동 경로, 처리 시간, 수락률을 모두 알고 있습니다.<br>
-      그러나 정작 라이더는 오늘 실질 시급이 얼마인지 모릅니다.<br>
-      유튜버는 자신의 경험을 팝니다. 선배는 감으로만 압니다.<br>
-      하루 10시간 운행 후 만신창이로 귀가하면 계획을 세울 에너지조차 없습니다.
-    </p>
-    <div class="problem-grid">
-      <div class="problem-item reveal">
-        <div class="problem-q">"어디로 가야 할지 몰라서 그냥 돌아다녔습니다"</div>
-        <div class="problem-a">내 과거 운행 데이터가 <b>어디로 가야 하는지</b> 알려줍니다.</div>
-      </div>
-      <div class="problem-item reveal">
-        <div class="problem-q">"오늘 실질 시급이 얼마인지 퇴근 후에도 모릅니다"</div>
-        <div class="problem-a">실질 시급, 공차 비율, 순수익을 <b>자동으로 계산</b>합니다.</div>
-      </div>
-      <div class="problem-item reveal">
-        <div class="problem-q">"주차장에서 헤매다 미션을 놓쳤습니다"</div>
-        <div class="problem-a">PIN, 출입 방법, 주차 구조를 <b>음성으로 먼저 안내</b>합니다.</div>
-      </div>
-      <div class="problem-item reveal">
-        <div class="problem-q">"쿠팡이 나은지 배민이 나은지 모르겠습니다"</div>
-        <div class="problem-a">내 데이터 기반 <b>플랫폼별 실제 수익</b>을 비교합니다.</div>
-      </div>
-    </div>
-  </div>
-</section>
+    <header>
+        <div class="sub-philosophic">DATA SOVEREIGNTY</div>
+        <h1>내가 흘린 땀의 가치,<br>플랫폼이 아닌 내가 소유합니다</h1>
+        <p class="hero-desc">라이더 HUD는 알고리즘의 블랙박스를 열어 투명한 노동 데이터를 실현합니다. 감시와 통제를 넘어 라이더의 경험을 자산으로 만드는 독립적 운영 레이어.</p>
+    </header>
 
-<!-- SOLUTION -->
-<section class="solution">
-  <div class="solution-inner">
-    <div class="section-label reveal">THE SOLUTION</div>
-    <h2 class="section-title reveal"><em>내 데이터만이</em> 나의 답입니다</h2>
-    <div class="solution-stmt reveal">
-      HUD는 운행 중 쌓이는 모든 경험을 <b>데이터로 기록</b>합니다.<br>
-      입력 부담은 최소화하고 <b>분석은 자동</b>으로 합니다.<br>
-      모든 데이터는 <b>내 기기에만 저장</b>됩니다.
-    </div>
-  </div>
-</section>
-
-<!-- MODULES -->
-<div id="modules">
-
-  <!-- HUD -->
-  <div class="module">
-    <div class="module-visual reveal">
-      <div class="hud-mockup">
-        <div class="hm-header">
-          <div class="hm-title">H U D</div>
-          <div class="hm-date">2026.05.18 (월) · 26° 맑음</div>
+    <main class="timer-container">
+        <div class="timer-grid">
+            <div class="timer-card">
+                <div class="timer-label">배달 주행 타이머</div>
+                <div class="timer-display" id="drive-display">00:00:00</div>
+                <div class="btn-group">
+                    <button class="btn-start" id="drive-start-btn" onclick="toggleTimer('drive')">시작</button>
+                    <button class="btn-reset" onclick="resetTimer('drive')">리셋</button>
+                </div>
+            </div>
+            <div class="timer-card">
+                <div class="timer-label">콜 대기 타이머</div>
+                <div class="timer-display" id="wait-display">00:00:00</div>
+                <div class="btn-group">
+                    <button class="btn-start" id="wait-start-btn" onclick="toggleTimer('wait')">시작</button>
+                    <button class="btn-reset" onclick="resetTimer('wait')">리셋</button>
+                </div>
+            </div>
         </div>
-        <div class="hm-alert">
-          <div class="hm-alert-label">📍 근접 알림 · 자동 안내</div>
-          <div class="hm-alert-text">공동현관 비밀번호<br>1 2 3 4 #</div>
-          <div class="hm-alert-sub">지하 B1 · 엘리베이터 좌측</div>
-        </div>
-        <div class="hm-cycle">
-          <div class="hm-btn arrived">도착</div>
-          <div class="hm-btn pickup">픽업</div>
-          <div class="hm-btn drop">드롭</div>
-        </div>
-        <div class="hm-floor">
-          <div class="hm-floor-btn">L</div>
-          <div class="hm-floor-btn">1F</div>
-          <div class="hm-floor-btn active">B1</div>
-          <div class="hm-floor-btn">B2</div>
-          <div class="hm-floor-btn">B3</div>
-        </div>
-      </div>
-    </div>
-    <div class="module-info reveal">
-      <div class="mod-num">01 / 03</div>
-      <div class="mod-tag">HUD</div>
-      <div class="mod-title">현장 기억<br>외부 두뇌</div>
-      <div class="mod-problem">"아파트마다 다른 PIN을 매번 인터폰으로 확인합니다. 주차장에서 헤매다 미션을 놓쳤습니다."</div>
-      <div class="mod-solution">저장된 장소에 근접하면 <b>PIN을 자동으로 음성 안내</b>합니다. 헬멧 쓴 채로 들을 수 있습니다. <b>도착·픽업·드롭</b> 배달 사이클을 자동으로 추적합니다.</div>
-      <div class="mod-features">
-        <div class="mod-feature">PIN · 출입 방식 · 층수 자동 안내</div>
-        <div class="mod-feature">도착 · 픽업 · 드롭 사이클 추적</div>
-        <div class="mod-feature">조리 대기 · 배달 시간 자동 기록</div>
-        <div class="mod-feature">위험 구간 · 주차 구조 메모</div>
-      </div>
-      <a href="hud.html" class="mod-link">상세 보기 →</a>
-    </div>
-  </div>
+    </main>
 
-  <!-- MANAGER -->
-  <div class="module reverse">
-    <div class="module-visual reveal">
-      <div class="mgr-mockup">
-        <div class="mgr-header">
-          <div class="mgr-title">MANAGER · 통계 · 수익</div>
+    <section class="manifesto-section">
+        <div class="section-title">HUD의 핵심 가치 선언</div>
+        <div class="manifesto-grid">
+            <div class="manifesto-card">
+                <h3>개인 라이더 운영체제 (Personal OS)</h3>
+                <p>단순한 배달 보조 앱이나 주문 중개 플랫폼이 아닙니다. 라이더 고유의 현장 경험과 운행 기록을 온전히 스스로 통제하고 분석할 수 있게 만드는 전용 아키텍처입니다.</p>
+            </div>
+            <div class="manifesto-card">
+                <h3>철저한 기기 내부 로컬 저장</h3>
+                <p>데이터를 중앙 서버에 강제로 묶어 고착화하지 않습니다. 모든 센서 레이어 데이터와 통계는 오직 사용자 기기 내부(IndexedDB)에만 안전하게 암호화 보존됩니다.</p>
+            </div>
+            <div class="manifesto-card">
+                <h3>개발자 조차 접근 불가</h3>
+                <p>중앙 통제나 데이터 마이닝을 배제합니다. 사용자의 데이터 주권을 지키기 위해 어떠한 클라우드 강제 업로드나 트래킹 장치도 심지 않는 것이 HUD의 절대 규칙입니다.</p>
+            </div>
+            <div class="manifesto-card">
+                <h3>기억의 외부 확장 두뇌</h3>
+                <p>단순히 몸으로만 기억하고 사라지던 단속 위치, 출입 방식, 피크 시간대 수익 흐름을 라이더 자신만의 영구적인 공간 데이터 자산으로 완벽하게 구조화합니다.</p>
+            </div>
         </div>
-        <div class="mgr-main">
-          <div class="mgr-main-label">⚡ 실시급 · 순작업시간당</div>
-          <div class="mgr-main-value">₩23,897<span class="mgr-main-unit">/h</span></div>
-        </div>
-        <div class="mgr-grid">
-          <div class="mgr-cell">
-            <div class="mgr-cell-label">총 시급</div>
-            <div class="mgr-cell-value">₩18,240</div>
-          </div>
-          <div class="mgr-cell">
-            <div class="mgr-cell-label">공차율</div>
-            <div class="mgr-cell-value orange">13%</div>
-          </div>
-          <div class="mgr-cell">
-            <div class="mgr-cell-label">건당 수입</div>
-            <div class="mgr-cell-value green">₩4,850</div>
-          </div>
-          <div class="mgr-cell">
-            <div class="mgr-cell-label">처리 건수</div>
-            <div class="mgr-cell-value">16건/h</div>
-          </div>
-        </div>
-        <div class="mgr-platforms">
-          <div class="mgr-platform active">배달의민족</div>
-          <div class="mgr-platform">쿠팡이츠</div>
-          <div class="mgr-platform">일반대행</div>
-          <div class="mgr-platform">기타</div>
-        </div>
-      </div>
-    </div>
-    <div class="module-info reveal">
-      <div class="mod-num">02 / 03</div>
-      <div class="mod-tag">MANAGER</div>
-      <div class="mod-title">감이 아니라<br>숫자로</div>
-      <div class="mod-problem">"오늘 10시간 일해서 15만원 벌었는데 실질 시급이 얼마인지 모릅니다. 배달 가계부는 3일을 못 넘겼습니다."</div>
-      <div class="mod-solution">수입만 입력하면 <b>실질 시급, 공차율, 플랫폼별 수익</b>을 자동 계산합니다. 만신창이 몸으로도 <b>3초면 정산</b> 완료입니다.</div>
-      <div class="mod-features">
-        <div class="mod-feature">실질 시급 · 공차율 자동 계산</div>
-        <div class="mod-feature">플랫폼별 수익 비교</div>
-        <div class="mod-feature">미션 효율 분석</div>
-        <div class="mod-feature">주간 · 월간 · 연간 통계</div>
-      </div>
-      <a href="manager.html" class="mod-link">상세 보기 →</a>
-    </div>
-  </div>
+    </section>
 
-  <!-- HEATMAP -->
-  <div class="module">
-    <div class="module-visual reveal">
-      <div class="hmp-mockup">
-        <div class="hmp-header">
-          <div class="hmp-title">HEATMAP 전략 지도</div>
-          <div class="hmp-days">
-            <div class="hmp-day">일</div>
-            <div class="hmp-day active">월</div>
-            <div class="hmp-day">화</div>
-            <div class="hmp-day">수</div>
-          </div>
+    <section class="roadmap-section">
+        <div class="section-title">HUD 아키텍처 진화 단계</div>
+        <div class="roadmap-timeline">
+            <div class="roadmap-card">
+                <div class="roadmap-left">
+                    <h4>1단계 — 기억 보조 HUD</h4>
+                    <p>위치 기반 메모, PIN 자동 안내 및 TTS 현장 스트레스 경감 레이어</p>
+                </div>
+                <div class="roadmap-badge">현재 활성</div>
+            </div>
+            <div class="roadmap-card">
+                <div class="roadmap-left">
+                    <h4>1.5단계 — 안전 보조 HUD</h4>
+                    <p>과속 단속 카메라 및 후면 단속 정보 실시간 인지 가이드</p>
+                </div>
+                <div class="roadmap-badge" style="background: rgba(255,255,255,0.05); color: var(--text-muted);">준비중</div>
+            </div>
+            <div class="roadmap-card">
+                <div class="roadmap-left">
+                    <h4>2단계 — Rider Manager</h4>
+                    <p>직관적 정산 통계, 실시간 시급 분석 및 플랫폼간 수익 효율성 비교</p>
+                </div>
+                <div class="roadmap-badge" style="background: rgba(255,255,255,0.05); color: var(--text-muted);">개발중</div>
+            </div>
+            <div class="roadmap-card">
+                <div class="roadmap-left">
+                    <h4>3단계 — Heat Map 공간 분석</h4>
+                    <p>과거 운행 흐름 기반 지역별 수익 밀도 시각화 지도 생성</p>
+                </div>
+                <div class="roadmap-badge" style="background: rgba(255,255,255,0.05); color: var(--text-muted);">기획단계</div>
+            </div>
+            <div class="roadmap-card">
+                <div class="roadmap-left">
+                    <h4>4단계 — 완전 자동화 로컬 엔진</h4>
+                    <p>인터셉트 기술 기반 자동 기록 노동 제거 및 자율 캡처 레이어</p>
+                </div>
+                <div class="roadmap-badge" style="background: rgba(255,255,255,0.05); color: var(--text-muted);">최종진화</div>
+            </div>
         </div>
-        <div class="hmp-map">
-          <div class="hmp-zone hmp-hot1"></div>
-          <div class="hmp-zone hmp-hot2"></div>
-          <div class="hmp-zone hmp-warm"></div>
-          <div class="hmp-zone hmp-cold"></div>
-          <div class="hmp-dot hmp-you"></div>
-        </div>
-        <div class="hmp-legend">
-          <div class="hmp-legend-item"><div class="hmp-dot-hot"></div>HOT ZONE</div>
-          <div class="hmp-legend-item"><div class="hmp-dot-cold"></div>ICE ZONE</div>
-          <div class="hmp-legend-item"><div class="hmp-dot-me"></div>현재 위치</div>
-        </div>
-        <div class="hmp-times">
-          <div class="hmp-time">오전</div>
-          <div class="hmp-time">점피</div>
-          <div class="hmp-time active">오후</div>
-          <div class="hmp-time">저피</div>
-          <div class="hmp-time">야간</div>
-          <div class="hmp-time">심야</div>
-        </div>
-      </div>
-    </div>
-    <div class="module-info reveal">
-      <div class="mod-num">03 / 03</div>
-      <div class="mod-tag">HEATMAP</div>
-      <div class="mod-title">밤마다 지도를<br>연구하지 않아도</div>
-      <div class="mod-problem">"1년 동안 밤마다 지도를 펼쳐놓고 연구했습니다. 그래도 다음날 현장에서 맞는지 틀리는지 몰랐습니다."</div>
-      <div class="mod-solution">내 과거 운행 데이터가 <b>어디로 가야 하는지</b> 지도로 보여줍니다. 유튜버의 꿀팁이 아닌 <b>내 데이터가 나의 전략</b>입니다.</div>
-      <div class="mod-features">
-        <div class="mod-feature">픽업 · 드롭 밀집 구역 시각화</div>
-        <div class="mod-feature">요일 · 시간대별 전략 필터</div>
-        <div class="mod-feature">Hot Zone · Ice Zone 구분</div>
-        <div class="mod-feature">100건부터 데이터 축적 시작</div>
-      </div>
-      <a href="heatmap.html" class="mod-link">상세 보기 →</a>
-    </div>
-  </div>
+    </section>
 
-</div>
+    <footer>
+        <div class="footer-quote">라이더의 하루를 플랫폼의 데이터가 아닌, 라이더 자신의 자산으로 되돌립니다.</div>
+        <div class="footer-sub">© 2026 RIDER HUD. Powered by Local Sovereign Architecture.</div>
+    </footer>
 
-<!-- MANIFESTO -->
-<section class="manifesto">
-  <div class="manifesto-inner">
-    <div class="manifesto-label reveal">DATA SOVEREIGNTY</div>
-    <blockquote class="manifesto-quote reveal">"개발자조차<br>당신의 데이터에<br>접근하지 못합니다."</blockquote>
-    <div class="manifesto-list reveal">
-      <div class="manifesto-item">클라우드 강제 업로드 없음</div>
-      <div class="manifesto-item">중앙 서버 없음</div>
-      <div class="manifesto-item">사용자 추적 없음</div>
-      <div class="manifesto-item">데이터 판매 없음</div>
-      <div class="manifesto-item">AES-256 로컬 암호화</div>
-      <div class="manifesto-item">오프라인 완전 작동</div>
-    </div>
-  </div>
-</section>
+    <script>
+        let timers = {
+            drive: { id: null, elapsed: 0, running: false },
+            wait: { id: null, elapsed: 0, running: false }
+        };
 
-<!-- ROADMAP -->
-<section class="roadmap">
-  <div class="roadmap-inner">
-    <div class="section-label reveal">ROADMAP</div>
-    <h2 class="section-title reveal">HUD는 계속 <em>진화합니다</em></h2>
-    <div class="roadmap-steps reveal">
-      <div class="roadmap-step on"><div class="step-num">1단계</div><div class="step-name">기억 HUD</div><div class="step-desc">GPS 핀 메모 · 음성 안내</div><span class="step-badge badge-on">운영 중</span></div>
-      <div class="roadmap-step on"><div class="step-num">1.5단계</div><div class="step-name">안전 보조</div><div class="step-desc">후면 단속 · 과속 카메라</div><span class="step-badge badge-on">운영 중</span></div>
-      <div class="roadmap-step on"><div class="step-num">2단계</div><div class="step-name">Rider Manager</div><div class="step-desc">정산 · 시급 · 플랫폼 비교</div><span class="step-badge badge-on">운영 중</span></div>
-      <div class="roadmap-step"><div class="step-num">3단계</div><div class="step-name">Heat Map</div><div class="step-desc">전략 지도 · 시간대 분석</div><span class="step-badge badge-dev">개발 중</span></div>
-      <div class="roadmap-step"><div class="step-num">4단계</div><div class="step-name">완전 자동화</div><div class="step-desc">콜 감지 · 자동 기록</div><span class="step-badge badge-next">예정</span></div>
-    </div>
-    <div class="roadmap-more reveal"><a href="roadmap.html">전체 로드맵 보기 →</a></div>
-  </div>
-</section>
+        function toggleTimer(type) {
+            const timer = timers[type];
+            const btn = document.getElementById(`${type}-start-btn`);
+            
+            if (!timer.running) {
+                timer.running = true;
+                btn.textContent = '정지';
+                btn.style.backgroundColor = '#ef4444'; // 정지 시 빨간색
+                
+                timer.id = setInterval(() => {
+                    timer.elapsed++;
+                    updateDisplay(type);
+                }, 1000);
+            } else {
+                timer.running = false;
+                btn.textContent = '시작';
+                btn.style.backgroundColor = 'var(--accent-green)';
+                clearInterval(timer.id);
+            }
+        }
 
-<!-- CTA -->
-<section class="cta">
-  <div class="cta-inner">
-    <div class="cta-label reveal">FREE · PWA · NO APP STORE</div>
-    <h2 class="cta-title reveal">지금 바로 시작하세요</h2>
-    <p class="cta-sub reveal">앱스토어 설치 불필요. 브라우저에서 바로 실행됩니다.<br>기본 기능은 영구 무료입니다.</p>
-    <div class="reveal"><a href="https://riderhud.kr" class="btn btn-green" style="font-size:0.9rem;padding:20px 64px;">앱 열기 →</a></div>
-    <div class="cta-links reveal">
-      <a href="install.html">설치 가이드 →</a>
-      <a href="https://open.kakao.com">카카오 커뮤니티 →</a>
-      <a href="roadmap.html">로드맵 →</a>
-    </div>
-  </div>
-</section>
+        function resetTimer(type) {
+            const timer = timers[type];
+            timer.running = false;
+            clearInterval(timer.id);
+            timer.elapsed = 0;
+            
+            const btn = document.getElementById(`${type}-start-btn`);
+            btn.textContent = '시작';
+            btn.style.backgroundColor = 'var(--accent-green)';
+            updateDisplay(type);
+        }
 
-<!-- FOOTER -->
-<footer>
-  <div class="foot-logo">HUD for Riders</div>
-  <nav class="foot-nav">
-    <a href="philosophy.html">철학</a>
-    <a href="hud.html">HUD</a>
-    <a href="manager.html">Manager</a>
-    <a href="heatmap.html">Heatmap</a>
-    <a href="roadmap.html">Roadmap</a>
-    <a href="install.html">설치</a>
-  </nav>
-  <div class="foot-copy">© 2026 Smart Tool Korea · riderhud.kr</div>
-</footer>
-
-<script>
-  const obs = new IntersectionObserver(entries => {
-    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('on'); });
-  }, {threshold:0.1});
-  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
-</script>
+        function updateDisplay(type) {
+            const totalSeconds = timers[type].elapsed;
+            const hrs = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+            const mins = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+            const secs = String(totalSeconds % 60).padStart(2, '0');
+            
+            document.getElementById(`${type}-display`).textContent = `${hrs}:${mins}:${secs}`;
+        }
+    </script>
 </body>
 </html>
