@@ -43,20 +43,23 @@
     font-family:'IBM Plex Mono',monospace; font-size:0.85rem; letter-spacing:2px;
     color:#ccc; text-decoration:none; transition:color 0.2s;
   }
-  .nav-menu a:hover { color:var(--text); }
+  .nav-menu a:hover { color:var(--green); }
   .nav-cta { background:var(--green)!important; color:#000!important; padding:10px 24px; font-weight:700!important; }
 
   /* HERO */
   .hero {
-    min-height:100vh; display:flex; flex-direction:column;
-    justify-content:center; padding:140px 48px 100px;
+    min-height:calc(100vh - 64px);
+    display:grid; grid-template-columns:1fr 1fr;
+    align-items:center;
+    padding:80px 48px;
     position:relative; overflow:hidden;
+    background:#000;
   }
   .hero-grid {
     position:absolute; inset:0;
     background-image:
-      linear-gradient(rgba(0,255,136,0.025) 1px,transparent 1px),
-      linear-gradient(90deg,rgba(0,255,136,0.025) 1px,transparent 1px);
+      linear-gradient(rgba(0,255,136,0.02) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(0,255,136,0.02) 1px,transparent 1px);
     background-size:64px 64px; pointer-events:none;
   }
   .hero-glow {
@@ -65,7 +68,17 @@
     background:radial-gradient(ellipse,rgba(0,255,136,0.04) 0%,transparent 65%);
     pointer-events:none;
   }
-  .hero-content { position:relative; max-width:760px; }
+  .hero-content { position:relative; }
+  .hero-image {
+    position:relative;
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; animation:up 0.7s 0.4s forwards;
+  }
+  .hero-image img {
+    width:100%; max-width:600px;
+    border-radius:8px;
+    object-fit:cover;
+  }
   .hero-eyebrow {
     font-family:'IBM Plex Mono',monospace; font-size:0.65rem; letter-spacing:5px;
     color:var(--green); margin-bottom:28px;
@@ -366,8 +379,9 @@
   .reveal.on { opacity:1; transform:translateY(0); }
 
   @media(max-width:900px){
-    nav{padding:16px 20px;} .nav-menu{display:none;}
-    .hero{padding:100px 20px 80px;}
+    nav{padding:0 20px;} .nav-menu{display:none;}
+    .hero{grid-template-columns:1fr; padding:40px 20px;}
+    .hero-image{display:none;}
     .problem{padding:80px 20px;}
     .solution{padding:80px 20px;}
     .module{grid-template-columns:1fr;}
@@ -409,6 +423,9 @@
       <a href="https://riderhud.kr" class="btn btn-green">지금 설치하기 →</a>
       <a href="#problem" class="btn btn-ghost">왜 필요한가</a>
     </div>
+  </div>
+  <div class="hero-image">
+    <img src="hero.jpg" alt="라이더 HUD - 내가 흘린 땀의 가치, 라이더가 소유합니다">
   </div>
 </section>
 
