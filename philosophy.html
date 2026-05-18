@@ -24,17 +24,23 @@
 
   /* NAV */
   nav {
-    position:fixed; top:0; left:0; right:0; z-index:100;
-    padding:18px 48px;
+    position:sticky; top:0; left:0; right:0; z-index:100;
+    padding:0 48px; height:64px;
     display:flex; justify-content:space-between; align-items:center;
-    background:rgba(0,0,0,0.95); backdrop-filter:blur(20px);
-    border-bottom:1px solid var(--border);
+    background:#000;
+    border-bottom:2px solid var(--green);
   }
-  .nav-logo img { height:32px; }
+  .nav-logo {
+    font-family:'IBM Plex Mono',monospace;
+    font-size:1.1rem; font-weight:700;
+    letter-spacing:4px; color:var(--green);
+    text-decoration:none;
+  }
+  .nav-logo span { color:#555; font-weight:300; }
   .nav-menu { display:flex; gap:36px; list-style:none; align-items:center; }
   .nav-menu a {
-    font-family:'IBM Plex Mono',monospace; font-size:0.7rem; letter-spacing:2px;
-    color:var(--dim); text-decoration:none; transition:color 0.2s;
+    font-family:'IBM Plex Mono',monospace; font-size:0.85rem; letter-spacing:2px;
+    color:#ccc; text-decoration:none; transition:color 0.2s;
   }
   .nav-menu a:hover { color:var(--text); }
   .nav-menu a.active { color:var(--green); }
@@ -208,7 +214,7 @@
 <body>
 
 <nav>
-  <div class="nav-logo"><img src="logo.png" alt="Rider HUD"></div>
+  <a class="nav-logo" href="index.html">HUD<span> for Riders</span></a>
   <ul class="nav-menu">
     <li><a href="philosophy.html" class="active">철학</a></li>
     <li><a href="index.html#modules">기능</a></li>
