@@ -48,10 +48,19 @@
 
   /* HERO */
   .hero {
-    min-height:70vh; display:flex; flex-direction:column;
-    justify-content:center; padding:160px 48px 80px;
+    min-height:calc(100vh - 64px);
+    display:grid; grid-template-columns:1fr 1fr;
+    align-items:center; gap:48px;
+    padding:80px 48px;
     position:relative; overflow:hidden;
     border-bottom:1px solid var(--border);
+  }
+  .hero-image {
+    position:relative;
+    opacity:0; animation:up 0.7s 0.4s forwards;
+  }
+  .hero-image img {
+    width:100%; border-radius:8px; object-fit:cover;
   }
   .hero-grid {
     position:absolute; inset:0;
@@ -232,7 +241,9 @@
 
   @media(max-width:900px){
     nav{padding:0 20px;} .nav-menu{display:none;} .nav-hamburger{display:flex;}
-    .hero{padding:120px 20px 60px;}
+    .hero{grid-template-columns:1fr; padding:40px 20px; gap:24px;}
+    .hero-h1{font-size:clamp(1.6rem,6vw,2.4rem);}
+    .hero-image{display:block;}
     .section{padding:60px 20px;}
     .declaration{padding:100px 20px;}
     .cta{padding:60px 20px;}
@@ -268,7 +279,7 @@
 </div>
 
 <!-- HERO -->
-<section class="hero" style="display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:48px;min-height:calc(100vh - 64px);padding:80px 48px;">
+<section class="hero">
   <div class="hero-grid"></div>
   <div class="hero-glow"></div>
   <div class="hero-content" style="position:relative;">
@@ -283,8 +294,8 @@
       <strong style="color:#fff">개인형 라이더 운영체제(Personal Rider OS)</strong>입니다.
     </p>
   </div>
-  <div style="position:relative;opacity:0;animation:up 0.7s 0.4s forwards;">
-    <img src="hero2.jpg" alt="라이더 HUD - 라이더 운영체제" style="width:100%;border-radius:8px;object-fit:cover;">
+  <div class="hero-image">
+    <img src="hero2.jpg" alt="라이더 HUD - 라이더 운영체제">
   </div>
 </section>
 
