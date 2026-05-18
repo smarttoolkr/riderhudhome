@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Heatmap — Rider HUD</title>
+<meta name="description" content="내 과거 운행 데이터가 어디로 가야 하는지 알려줍니다. 밤마다 지도를 연구하지 않아도 됩니다.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;700&family=Noto+Sans+KR:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #00ff88;
+    --bg: #000;
+    --bg2: #060606;
+    --text: #fff;
+    --sub: #aaa;
+    --dim: #777;
+    --off: #444;
+    --border: #111;
+    --yellow: #ffaa00;
+    --red: #ff4444;
+    --hot: #ff3c3c;
+    --cold: #3c6aff;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { background:var(--bg); color:var(--text); font-family:'Noto Sans KR',sans-serif; overflow-x:hidden; }
+
+  /* NAV */
+  nav {
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    padding:18px 48px;
+    display:flex; justify-content:space-between; align-items:center;
+    background:rgba(0,0,0,0.95); backdrop-filter:blur(20px);
+    border-bottom:1px solid var(--border);
+  }
+  .nav-logo img { height:32px; }
+  .nav-menu { display:flex; gap:36px; list-style:none; align-items:center; }
+  .nav-menu a { font-family:'IBM Plex Mono',monospace; font-size:0.7rem; letter-spacing:2px; color:var(--dim); text-decoration:none; transition:color 0.2s; }
+  .nav-menu a:hover { color:var(--text); }
+  .nav-menu a.active { color:var(--green); }
+  .nav-cta { background:var(--green)!important; color:#000!important; padding:10px 24px; font-weight:700!important; }
+
+  /* HERO */
+  .hero {
+    min-height:80vh; display:flex; flex-direction:column;
+    justify-content:center; padding:160px 48px 80px;
+    position:relative; overflow:hidden;
+    border-bottom:1px solid var(--border);
+  }
+  .hero-grid {
+    position:absolute; inset:0;
+    background-image:
+      linear-gradient(rgba(0,255,136,0.02) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(0,255,136,0.02) 1px,transparent 1px);
+    background-size:64px 64px; pointer-events:none;
+  }
+  .hero-glow {
+    position:absolute; top:10%; right:5%;
+    width:50vw; height:70vh;
+    background:radial-gradient(ellipse,rgba(0,255,136,0.04) 0%,transparent 65%);
+    pointer-events:none;
+  }
+  .hero-layout {
+    position:relative;
+    display:grid; grid-template-columns:1fr 1fr;
+    gap:80px; align-items:center; max-width:1100px;
+  }
+  .hero-eyebrow { font-family:'IBM Plex Mono',monospace; font-size:0.65rem; letter-spacing:5px; color:var(--green); margin-bottom:24px; opacity:0; animation:up 0.7s 0.2s forwards; }
+  .hero-h1 { font-size:clamp(2.2rem,4.5vw,3.6rem); font-weight:900; line-height:1.2; margin-bottom:28px; opacity:0; animation:up 0.7s 0.35s forwards; }
+  .hero-h1 em { color:var(--green); font-style:normal; }
+  .hero-desc { font-size:0.95rem; color:var(--sub); line-height:1.9; font-weight:300; margin-bottom:40px; opacity:0; animation:up 0.7s 0.5s forwards; }
+  .hero-desc b { color:var(--text); font-weight:700; }
+
+  /* Heatmap 목업 */
+  .hero-mockup { opacity:0; animation:up 0.7s 0.4s forwards; }
+  .hmp-mockup {
+    width:100%; max-width:300px; margin:0 auto;
+    background:#0d0d0d; border-radius:20px;
+    border:1px solid #1e1e1e; overflow:hidden;
+    box-shadow:0 32px 80px rgba(0,0,0,0.9);
+  }
+  .hmp-header { padding:16px 20px; border-bottom:1px solid #1a1a1a; }
+  .hmp-title-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+  .hmp-title { font-family:'IBM Plex Mono',monospace; color:var(--green); font-size:0.75rem; letter-spacing:2px; font-weight:700; }
+  .hmp-badge { font-family:'IBM Plex Mono',monospace; font-size:0.55rem; letter-spacing:1px; color:var(--green); border:1px solid rgba(0,255,136,0.3); padding:3px 8px; }
+  .hmp-days { display:flex; gap:4px; }
+  .hmp-day { flex:1; height:32px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:0.65rem; font-weight:700; background:#1a1a1a; color:var(--off); }
+  .hmp-day.active { background:#0a1f0a; border:1px solid var(--green); color:var(--green); }
+  .hmp-map {
+    height:200px; position:relative; overflow:hidden;
+    background:#080e08;
+  }
+  .hmp-map::before {
+    content:''; position:absolute; inset:0;
+    background-image:
+      linear-gradient(rgba(0,255,136,0.04) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(0,255,136,0.04) 1px,transparent 1px);
+    background-size:20px 20px;
+  }
+  /* 도로 라인 */
+  .hmp-road-h { position:absolute; height:2px; background:rgba(0,255,136,0.08); }
+  .hmp-road-v { position:absolute; width:2px; background:rgba(0,255,136,0.08); }
+  /* 히트 존 */
+  .hmp-zone { position:absolute; border-radius:50%; filter:blur(18px); }
+  .hmp-hot1 { width:90px; height:90px; background:rgba(255,60,60,0.65); top:25%; left:38%; }
+  .hmp-hot2 { width:55px; height:55px; background:rgba(255,120,0,0.55); top:10%; left:58%; }
+  .hmp-hot3 { width:45px; height:45px; background:rgba(255,60,60,0.45); top:55%; left:60%; }
+  .hmp-warm { width:70px; height:70px; background:rgba(255,200,0,0.3); top:45%; left:18%; }
+  .hmp-cold1 { width:65px; height:65px; background:rgba(60,106,255,0.35); top:8%; left:8%; }
+  .hmp-cold2 { width:50px; height:50px; background:rgba(60,106,255,0.25); top:60%; left:75%; }
+  /* 현재 위치 */
+  .hmp-me { position:absolute; top:44%; left:46%; }
+  .hmp-me-dot { width:8px; height:8px; border-radius:50%; background:var(--green); box-shadow:0 0 10px var(--green); }
+  .hmp-me-ring { position:absolute; width:20px; height:20px; border-radius:50%; border:1px solid rgba(0,255,136,0.4); top:-6px; left:-6px; animation:ring 2s infinite; }
+  @keyframes ring { 0%,100%{transform:scale(1);opacity:0.4} 50%{transform:scale(1.3);opacity:0.1} }
+  /* 마커 */
+  .hmp-marker { position:absolute; font-size:0.55rem; font-family:'IBM Plex Mono',monospace; color:rgba(255,60,60,0.9); background:rgba(0,0,0,0.7); padding:2px 4px; border-radius:2px; }
+
+  .hmp-legend { padding:10px 16px; display:flex; gap:12px; align-items:center; border-top:1px solid #1a1a1a; border-bottom:1px solid #1a1a1a; }
+  .hmp-legend-item { display:flex; align-items:center; gap:5px; font-size:0.58rem; color:var(--dim); font-family:'IBM Plex Mono',monospace; }
+  .hmp-dot { width:8px; height:8px; border-radius:50%; }
+  .hmp-dot.hot { background:var(--hot); }
+  .hmp-dot.cold { background:var(--cold); }
+  .hmp-dot.me { background:var(--green); box-shadow:0 0 5px var(--green); }
+
+  .hmp-times { display:flex; gap:3px; padding:10px 16px; }
+  .hmp-time { flex:1; padding:7px 2px; border-radius:6px; text-align:center; font-size:0.55rem; font-family:'IBM Plex Mono',monospace; background:#1a1a1a; color:var(--off); border:1px solid transparent; }
+  .hmp-time.active { background:#0a1f0a; border-color:var(--green); color:var(--green); }
+
+  /* SECTION 공통 */
+  .section { padding:100px 48px; border-bottom:1px solid var(--border); }
+  .section.dark { background:var(--bg2); }
+  .section-inner { max-width:1000px; margin:0 auto; }
+  .section-label { font-family:'IBM Plex Mono',monospace; font-size:0.62rem; letter-spacing:5px; color:var(--off); margin-bottom:16px; }
+  .section-title { font-size:clamp(1.6rem,3vw,2.4rem); font-weight:900; line-height:1.3; margin-bottom:16px; }
+  .section-title em { color:var(--green); font-style:normal; }
+  .section-desc { font-size:0.95rem; color:var(--sub); line-height:1.9; font-weight:300; max-width:680px; margin-bottom:56px; }
+  .section-desc b { color:var(--text); font-weight:700; }
+
+  /* 기능 카드 */
+  .feature-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1px; background:var(--border); border:1px solid var(--border); }
+  .feature-card { background:var(--bg); padding:40px 36px; transition:background 0.3s; }
+  .section.dark .feature-card { background:var(--bg2); }
+  .feature-card:hover { background:#050505; }
+  .feature-icon { font-size:1.8rem; margin-bottom:16px; display:block; }
+  .feature-tag { font-family:'IBM Plex Mono',monospace; font-size:0.6rem; letter-spacing:3px; color:var(--green); margin-bottom:12px; }
+  .feature-title { font-size:1rem; font-weight:700; margin-bottom:12px; color:var(--text); }
+  .feature-desc { font-size:0.82rem; color:var(--dim); line-height:1.8; font-weight:300; }
+
+  /* 온보딩 단계 */
+  .onboarding-steps {
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:1px; background:var(--border); border:1px solid var(--border); margin-top:48px;
+  }
+  .ob-step { background:var(--bg2); padding:36px 28px; position:relative; }
+  .ob-step.done { background:#040a04; }
+  .ob-step.done::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--green); }
+  .ob-count { font-family:'IBM Plex Mono',monospace; font-size:1.4rem; font-weight:700; color:var(--off); margin-bottom:8px; }
+  .ob-step.done .ob-count { color:var(--green); }
+  .ob-title { font-size:0.9rem; font-weight:700; color:var(--text); margin-bottom:8px; }
+  .ob-desc { font-size:0.75rem; color:var(--dim); line-height:1.7; font-weight:300; }
+  .ob-badge { font-family:'IBM Plex Mono',monospace; font-size:0.55rem; letter-spacing:1px; margin-top:16px; display:inline-block; padding:3px 8px; }
+  .ob-badge.active { color:var(--green); border:1px solid rgba(0,255,136,0.25); }
+  .ob-badge.soon { color:var(--off); border:1px solid #1a1a1a; }
+
+  /* Zone 설명 */
+  .zone-grid { display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--border); border:1px solid var(--border); margin-top:48px; }
+  .zone-item { padding:48px 40px; }
+  .zone-item.hot { background:#0d0404; }
+  .zone-item.cold { background:#04040d; }
+  .zone-dot { width:16px; height:16px; border-radius:50%; margin-bottom:16px; }
+  .zone-item.hot .zone-dot { background:var(--hot); box-shadow:0 0 16px rgba(255,60,60,0.4); }
+  .zone-item.cold .zone-dot { background:var(--cold); box-shadow:0 0 16px rgba(60,106,255,0.4); }
+  .zone-name { font-family:'IBM Plex Mono',monospace; font-size:0.7rem; letter-spacing:3px; margin-bottom:12px; }
+  .zone-item.hot .zone-name { color:var(--hot); }
+  .zone-item.cold .zone-name { color:var(--cold); }
+  .zone-title { font-size:1.1rem; font-weight:700; margin-bottom:12px; }
+  .zone-desc { font-size:0.85rem; color:var(--dim); line-height:1.8; font-weight:300; }
+
+  /* 강조 블록 */
+  .highlight-block { border-left:2px solid var(--green); padding:24px 32px; margin:40px 0; background:#050505; }
+  .highlight-block p { font-size:1rem; font-weight:700; color:var(--text); line-height:1.7; margin:0; }
+  .highlight-block em { color:var(--green); font-style:normal; }
+
+  /* 개발 중 배너 */
+  .dev-banner {
+    background:#0a0a0a; border:1px solid #1a1a1a;
+    padding:32px 40px; margin-top:48px;
+    display:flex; align-items:center; gap:20px;
+  }
+  .dev-banner-dot { width:10px; height:10px; border-radius:50%; background:var(--yellow); box-shadow:0 0 10px rgba(255,170,0,0.5); flex-shrink:0; animation:blink 1.5s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .dev-banner-text { font-size:0.85rem; color:var(--sub); line-height:1.7; font-weight:300; }
+  .dev-banner-text b { color:var(--text); font-weight:700; }
+
+  /* CTA */
+  .cta { padding:120px 48px; text-align:center; }
+  .cta-label { font-family:'IBM Plex Mono',monospace; font-size:0.6rem; letter-spacing:5px; color:var(--off); margin-bottom:24px; }
+  .cta-title { font-size:clamp(1.8rem,3.5vw,2.8rem); font-weight:900; margin-bottom:16px; }
+  .cta-sub { color:var(--dim); font-size:0.9rem; font-weight:300; margin-bottom:48px; line-height:1.8; }
+  .btn { font-family:'IBM Plex Mono',monospace; font-size:0.8rem; letter-spacing:2px; text-decoration:none; display:inline-block; padding:16px 44px; transition:all 0.2s; }
+  .btn-green { background:var(--green); color:#000; font-weight:700; }
+  .btn-green:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(0,255,136,0.25); }
+  .btn-ghost { border:1px solid #333; color:var(--dim); margin-left:16px; }
+  .btn-ghost:hover { border-color:#666; color:var(--text); }
+
+  /* 페이지 네비 */
+  .page-nav { padding:48px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+  .page-nav a { font-family:'IBM Plex Mono',monospace; font-size:0.7rem; letter-spacing:2px; color:var(--dim); text-decoration:none; transition:color 0.2s; }
+  .page-nav a:hover { color:var(--green); }
+
+  /* FOOTER */
+  footer { padding:36px 48px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; }
+  .foot-logo { font-family:'IBM Plex Mono',monospace; font-size:0.75rem; letter-spacing:4px; color:var(--off); }
+  .foot-nav { display:flex; gap:28px; }
+  .foot-nav a { font-family:'IBM Plex Mono',monospace; font-size:0.6rem; letter-spacing:1px; color:#222; text-decoration:none; transition:color 0.2s; }
+  .foot-nav a:hover { color:var(--dim); }
+  .foot-copy { font-family:'IBM Plex Mono',monospace; font-size:0.6rem; color:#222; }
+
+  @keyframes up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  .reveal { opacity:0; transform:translateY(28px); transition:opacity 0.7s,transform 0.7s; }
+  .reveal.on { opacity:1; transform:translateY(0); }
+
+  @media(max-width:900px){
+    nav{padding:16px 20px;} .nav-menu{display:none;}
+    .hero{padding:120px 20px 60px;}
+    .hero-layout{grid-template-columns:1fr; gap:40px;}
+    .hero-mockup{display:none;}
+    .section{padding:60px 20px;}
+    .zone-grid{grid-template-columns:1fr;}
+    .cta{padding:80px 20px;}
+    .page-nav{padding:28px 20px;flex-direction:column;gap:16px;text-align:center;}
+    footer{padding:28px 20px;flex-direction:column;align-items:flex-start;}
+    .btn-ghost{margin-left:0;margin-top:12px;}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo"><img src="logo.png" alt="Rider HUD"></div>
+  <ul class="nav-menu">
+    <li><a href="philosophy.html">철학</a></li>
+    <li><a href="index.html#modules" class="active">기능</a></li>
+    <li><a href="roadmap.html">로드맵</a></li>
+    <li><a href="install.html">설치</a></li>
+    <li><a href="https://riderhud.kr" class="nav-cta">앱 열기</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-layout">
+    <div class="hero-content">
+      <div class="hero-eyebrow">03 / 03 · HEATMAP</div>
+      <h1 class="hero-h1">밤마다 지도를<br><em>연구하지 않아도</em></h1>
+      <p class="hero-desc">
+        1년 동안 밤마다 지도를 펼쳐놓고 연구했습니다.<br>
+        그래도 다음날 현장에서 맞는지 틀리는지 몰랐습니다.<br>
+        <b>내 데이터가 내 지도를 만듭니다.</b>
+      </p>
+    </div>
+    <div class="hero-mockup">
+      <div class="hmp-mockup">
+        <div class="hmp-header">
+          <div class="hmp-title-row">
+            <div class="hmp-title">HEATMAP 전략 지도</div>
+            <div class="hmp-badge">LIVE</div>
+          </div>
+          <div class="hmp-days">
+            <div class="hmp-day">일</div>
+            <div class="hmp-day active">월</div>
+            <div class="hmp-day">화</div>
+            <div class="hmp-day">수</div>
+            <div class="hmp-day">목</div>
+            <div class="hmp-day">금</div>
+            <div class="hmp-day">토</div>
+          </div>
+        </div>
+        <div class="hmp-map">
+          <!-- 도로 라인 -->
+          <div class="hmp-road-h" style="top:30%;left:0;right:0;"></div>
+          <div class="hmp-road-h" style="top:60%;left:0;right:0;"></div>
+          <div class="hmp-road-v" style="left:35%;top:0;bottom:0;"></div>
+          <div class="hmp-road-v" style="left:65%;top:0;bottom:0;"></div>
+          <!-- 히트 존 -->
+          <div class="hmp-zone hmp-hot1"></div>
+          <div class="hmp-zone hmp-hot2"></div>
+          <div class="hmp-zone hmp-hot3"></div>
+          <div class="hmp-zone hmp-warm"></div>
+          <div class="hmp-zone hmp-cold1"></div>
+          <div class="hmp-zone hmp-cold2"></div>
+          <!-- 현재 위치 -->
+          <div class="hmp-me">
+            <div class="hmp-me-dot"></div>
+            <div class="hmp-me-ring"></div>
+          </div>
+          <!-- 마커 -->
+          <div class="hmp-marker" style="top:22%;left:36%;">HOT</div>
+        </div>
+        <div class="hmp-legend">
+          <div class="hmp-legend-item"><div class="hmp-dot hot"></div>HOT ZONE</div>
+          <div class="hmp-legend-item"><div class="hmp-dot cold"></div>ICE ZONE</div>
+          <div class="hmp-legend-item"><div class="hmp-dot me"></div>현재 위치</div>
+        </div>
+        <div class="hmp-times">
+          <div class="hmp-time">오전</div>
+          <div class="hmp-time">점피</div>
+          <div class="hmp-time active">오후</div>
+          <div class="hmp-time">저피</div>
+          <div class="hmp-time">야간</div>
+          <div class="hmp-time">심야</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 문제 제기 -->
+<section class="section dark">
+  <div class="section-inner">
+    <div class="section-label reveal">THE PROBLEM</div>
+    <h2 class="section-title reveal">라이더는 매일 <em>감으로 결정</em>합니다</h2>
+    <p class="section-desc reveal">
+      처음 시작한 라이더는 어디로 가야 할지 모릅니다.<br>
+      선배 라이더도 감으로만 알 뿐 데이터가 없습니다.<br>
+      비수기가 되면 기존 전략이 통하지 않습니다.<br>
+      라이더마다 최적 구역이 다릅니다.
+    </p>
+    <div class="feature-grid reveal">
+      <div class="feature-card">
+        <span class="feature-icon">🗺️</span>
+        <div class="feature-tag">데이터 부재</div>
+        <div class="feature-title">어디로 가야 할지 모릅니다</div>
+        <div class="feature-desc">처음 시작한 라이더는 무작정 돌아다닙니다. 콜이 많은 지역을 찾는 데만 몇 달이 걸립니다.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">👴</span>
+        <div class="feature-tag">선배의 한계</div>
+        <div class="feature-title">선배도 감으로만 압니다</div>
+        <div class="feature-desc">"그 구역은 좀 돼" — 경험에서 나온 감각이지 데이터가 아닙니다. 그 감각이 나에게 맞는지 알 수 없습니다.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📉</span>
+        <div class="feature-tag">비수기 대응</div>
+        <div class="feature-title">비수기엔 전략이 안 통합니다</div>
+        <div class="feature-desc">1년 걸려 만든 전략이 비수기 한 달에 무너집니다. 데이터가 있었다면 미리 알 수 있었습니다.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🎯</span>
+        <div class="feature-tag">개인 최적화</div>
+        <div class="feature-title">라이더마다 상황이 다릅니다</div>
+        <div class="feature-desc">사용 플랫폼, 운행 시간, 체력, 이동 반경이 모두 다릅니다. 남의 전략이 나에게 맞을 수 없습니다.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 솔루션 -->
+<section class="section">
+  <div class="section-inner">
+    <div class="section-label reveal">THE SOLUTION</div>
+    <h2 class="section-title reveal">내 데이터가<br><em>내 지도를 만듭니다</em></h2>
+    <p class="section-desc reveal">
+      유튜버의 꿀팁이 아닙니다.<br>
+      선배의 경험도 아닙니다.<br>
+      <b>내 과거 운행 데이터가 어디로 가야 하는지 말해줍니다.</b>
+    </p>
+    <div class="zone-grid reveal">
+      <div class="zone-item hot">
+        <div class="zone-dot"></div>
+        <div class="zone-name">HOT ZONE</div>
+        <div class="zone-title">지금 가야 할 곳</div>
+        <div class="zone-desc">픽업과 드롭이 집중된 구역입니다. 선택한 요일과 시간대에 콜이 많았던 곳입니다. 지금 이 구역으로 이동하세요.</div>
+      </div>
+      <div class="zone-item cold">
+        <div class="zone-dot"></div>
+        <div class="zone-name">ICE ZONE</div>
+        <div class="zone-title">피해야 할 곳</div>
+        <div class="zone-desc">픽업과 드롭이 거의 없었던 구역입니다. 공차만 늘어나는 곳입니다. 이 구역을 피하면 효율이 올라갑니다.</div>
+      </div>
+    </div>
+    <div class="highlight-block reveal">
+      <p>같은 시간, 같은 요일에<br><em>어디에 있었을 때 수익이 높았는지</em><br>지도가 직접 보여줍니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 핵심 기능 -->
+<section class="section dark">
+  <div class="section-inner">
+    <div class="section-label reveal">FEATURES</div>
+    <h2 class="section-title reveal">시간과 요일로<br><em>전략을 바꿉니다</em></h2>
+    <p class="section-desc reveal">
+      월요일 오후와 토요일 야간은 완전히 다릅니다.<br>
+      요일과 시간대를 선택하면 그에 맞는 전략 지도가 펼쳐집니다.
+    </p>
+    <div class="feature-grid reveal">
+      <div class="feature-card">
+        <span class="feature-icon">📅</span>
+        <div class="feature-tag">요일 필터</div>
+        <div class="feature-title">요일별 전략이 다릅니다</div>
+        <div class="feature-desc">평일과 주말, 월요일과 금요일의 수익 패턴이 다릅니다. 요일을 선택하면 그날의 최적 구역이 보입니다.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🕐</span>
+        <div class="feature-tag">시간대 필터</div>
+        <div class="feature-title">오전·점심·오후·저녁·야간·심야</div>
+        <div class="feature-desc">6개 시간대별로 수익 밀도가 다릅니다. 지금 몇 시인지 선택하면 어디로 가야 하는지 바로 알 수 있습니다.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📍</span>
+        <div class="feature-tag">픽업 · 드롭 가중치</div>
+        <div class="feature-title">픽업 위치를 더 중요하게</div>
+        <div class="feature-desc">픽업 위치에 더 높은 가중치를 줍니다. 음식을 받으러 가는 곳이 더 중요하기 때문입니다.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🌍</span>
+        <div class="feature-tag">V-World 지도</div>
+        <div class="feature-title">한국 정확도 최고</div>
+        <div class="feature-desc">국토교통부 V-World 지도를 사용합니다. 무료·무제한이며 한국 도로 정확도가 높습니다.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 온보딩 단계 -->
+<section class="section">
+  <div class="section-inner">
+    <div class="section-label reveal">ONBOARDING</div>
+    <h2 class="section-title reveal">데이터가 쌓일수록<br><em>전략이 정교해집니다</em></h2>
+    <p class="section-desc reveal">
+      처음부터 완벽한 지도가 나오지 않습니다.<br>
+      운행할수록 데이터가 쌓이고 지도가 정교해집니다.
+    </p>
+    <div class="onboarding-steps reveal">
+      <div class="ob-step">
+        <div class="ob-count">0건</div>
+        <div class="ob-title">시작</div>
+        <div class="ob-desc">HUD 탭에서 도착→픽업→드롭을 눌러 배달 기록을 쌓아주세요.</div>
+        <span class="ob-badge soon">데이터 수집 중</span>
+      </div>
+      <div class="ob-step">
+        <div class="ob-count">100건</div>
+        <div class="ob-title">마커 표시</div>
+        <div class="ob-desc">픽업·드롭 위치가 지도에 표시되기 시작합니다.</div>
+        <span class="ob-badge soon">기본 지도</span>
+      </div>
+      <div class="ob-step">
+        <div class="ob-count">300건</div>
+        <div class="ob-title">Hot/Ice Zone</div>
+        <div class="ob-desc">밀집 구역과 희박 구역이 색으로 구분됩니다.</div>
+        <span class="ob-badge soon">전략 가시화</span>
+      </div>
+      <div class="ob-step">
+        <div class="ob-count">500건</div>
+        <div class="ob-title">시간대 패턴</div>
+        <div class="ob-desc">시간대별로 다른 전략 지도가 만들어집니다.</div>
+        <span class="ob-badge soon">시간대 분석</span>
+      </div>
+      <div class="ob-step done">
+        <div class="ob-count">1000건</div>
+        <div class="ob-title">전략 완성</div>
+        <div class="ob-desc">요일×시간대 조합의 완전한 전략 지도가 완성됩니다.</div>
+        <span class="ob-badge active">전략 완성</span>
+      </div>
+    </div>
+    <div class="dev-banner reveal">
+      <div class="dev-banner-dot"></div>
+      <div class="dev-banner-text">
+        <b>현재 개발 중입니다.</b> 지금 HUD 탭에서 도착→픽업→드롭을 눌러 데이터를 쌓아두세요. Heatmap이 완성되는 순간, 당신의 지도가 바로 펼쳐집니다.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <div class="cta-label reveal">COMING SOON · 데이터 미리 쌓기</div>
+  <h2 class="cta-title reveal">지금부터 준비하세요</h2>
+  <p class="cta-sub reveal">
+    Heatmap 완성 전에 데이터를 쌓아두면<br>
+    완성되는 순간 바로 전략 지도를 볼 수 있습니다.
+  </p>
+  <div class="reveal">
+    <a href="https://riderhud.kr" class="btn btn-green">앱 열기 →</a>
+    <a href="index.html" class="btn btn-ghost">홈으로</a>
+  </div>
+</section>
+
+<!-- 페이지 네비 -->
+<div class="page-nav">
+  <a href="manager.html">← Manager</a>
+  <a href="roadmap.html">다음 · 로드맵 →</a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot-logo">HUD for Riders</div>
+  <nav class="foot-nav">
+    <a href="philosophy.html">철학</a>
+    <a href="hud.html">HUD</a>
+    <a href="manager.html">Manager</a>
+    <a href="heatmap.html">Heatmap</a>
+    <a href="roadmap.html">Roadmap</a>
+    <a href="install.html">설치</a>
+  </nav>
+  <div class="foot-copy">© 2026 Smart Tool Korea · riderhud.kr</div>
+</footer>
+
+<script>
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('on'); });
+  }, {threshold:0.1});
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>

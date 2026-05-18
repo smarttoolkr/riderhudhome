@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>안전 보조 — Rider HUD</title>
+<meta name="description" content="후면 단속 카메라, 과속 단속 구간 실시간 안내. 운행에 집중하세요.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;700&family=Noto+Sans+KR:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #00ff88;
+    --bg: #000;
+    --bg2: #060606;
+    --text: #fff;
+    --sub: #aaa;
+    --dim: #777;
+    --off: #444;
+    --border: #111;
+    --yellow: #ffaa00;
+    --red: #ff4444;
+    --orange: #ff6600;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { background:var(--bg); color:var(--text); font-family:'Noto Sans KR',sans-serif; overflow-x:hidden; }
+
+  /* NAV */
+  nav {
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    padding:18px 48px;
+    display:flex; justify-content:space-between; align-items:center;
+    background:rgba(0,0,0,0.95); backdrop-filter:blur(20px);
+    border-bottom:1px solid var(--border);
+  }
+  .nav-logo img { height:32px; }
+  .nav-menu { display:flex; gap:36px; list-style:none; align-items:center; }
+  .nav-menu a { font-family:'IBM Plex Mono',monospace; font-size:0.7rem; letter-spacing:2px; color:var(--dim); text-decoration:none; transition:color 0.2s; }
+  .nav-menu a:hover { color:var(--text); }
+  .nav-menu a.active { color:var(--green); }
+  .nav-cta { background:var(--green)!important; color:#000!important; padding:10px 24px; font-weight:700!important; }
+
+  /* HERO */
+  .hero {
+    min-height:80vh; display:flex; flex-direction:column;
+    justify-content:center; padding:160px 48px 80px;
+    position:relative; overflow:hidden;
+    border-bottom:1px solid var(--border);
+  }
+  .hero-grid {
+    position:absolute; inset:0;
+    background-image:
+      linear-gradient(rgba(255,68,68,0.015) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,68,68,0.015) 1px,transparent 1px);
+    background-size:64px 64px; pointer-events:none;
+  }
+  .hero-glow {
+    position:absolute; top:10%; right:5%;
+    width:50vw; height:70vh;
+    background:radial-gradient(ellipse,rgba(255,100,0,0.04) 0%,transparent 65%);
+    pointer-events:none;
+  }
+  .hero-layout {
+    position:relative;
+    display:grid; grid-template-columns:1fr 1fr;
+    gap:80px; align-items:center; max-width:1100px;
+  }
+  .hero-eyebrow { font-family:'IBM Plex Mono',monospace; font-size:0.65rem; letter-spacing:5px; color:var(--orange); margin-bottom:24px; opacity:0; animation:up 0.7s 0.2s forwards; }
+  .hero-h1 { font-size:clamp(2.2rem,4.5vw,3.6rem); font-weight:900; line-height:1.2; margin-bottom:28px; opacity:0; animation:up 0.7s 0.35s forwards; }
+  .hero-h1 em { color:var(--orange); font-style:normal; }
+  .hero-desc { font-size:0.95rem; color:var(--sub); line-height:1.9; font-weight:300; margin-bottom:40px; opacity:0; animation:up 0.7s 0.5s forwards; }
+  .hero-desc b { color:var(--text); font-weight:700; }
+
+  /* 안전 목업 */
+  .hero-mockup { opacity:0; animation:up 0.7s 0.4s forwards; }
+  .safety-mockup {
+    width:100%; max-width:300px; margin:0 auto;
+    background:#0d0d0d; border-radius:20px;
+    border:1px solid #1e1e1e; padding:24px;
+    box-shadow:0 32px 80px rgba(0,0,0,0.9);
+    position:relative;
+  }
+  .safety-mockup::before {
+    content:''; position:absolute; inset:0; border-radius:20px;
+    background:radial-gradient(ellipse at 50% 0%,rgba(255,100,0,0.06) 0%,transparent 55%);
+    pointer-events:none;
+  }
+  .sm-header { text-align:center; margin-bottom:20px; }
+  .sm-title { font-family:'IBM Plex Mono',monospace; color:var(--green); font-size:1.1rem; letter-spacing:4px; font-weight:700; }
+  .sm-date { font-size:0.62rem; color:var(--off); margin-top:4px; }
+
+  /* 경보 카드 */
+  .sm-alert-rear {
+    background:#1a0500; border:1px solid rgba(255,100,0,0.5);
+    border-radius:10px; padding:16px 18px; margin-bottom:12px;
+    animation:alert-pulse 1.5s infinite;
+  }
+  @keyframes alert-pulse {
+    0%,100% { border-color:rgba(255,100,0,0.4); box-shadow:none; }
+    50% { border-color:rgba(255,100,0,1); box-shadow:0 0 20px rgba(255,100,0,0.2); }
+  }
+  .sm-alert-speed {
+    background:#1a0a00; border:1px solid rgba(255,170,0,0.4);
+    border-radius:10px; padding:16px 18px; margin-bottom:12px;
+  }
+  .sm-alert-tag { font-size:0.58rem; letter-spacing:3px; margin-bottom:8px; font-family:'IBM Plex Mono',monospace; }
+  .sm-alert-rear .sm-alert-tag { color:var(--orange); }
+  .sm-alert-speed .sm-alert-tag { color:var(--yellow); }
+  .sm-alert-text { font-size:1rem; font-weight:700; line-height:1.4; }
+  .sm-alert-rear .sm-alert-text { color:#fff; }
+  .sm-alert-speed .sm-alert-text { color:#fff; }
+  .sm-alert-dist { font-size:0.65rem; color:var(--dim); margin-top:6px; font-family:'IBM Plex Mono',monospace; }
+
+  .sm-safe {
+    background:#0a1f0a; border:1px solid rgba(0,255,136,0.2);
+    border-radius:10px; padding:14px 18px;
+    display:flex; align-items:center; gap:12px;
+  }
+  .sm-safe-dot { width:8px; height:8px; border-radius:50%; background:var(--green); box-shadow:0 0 8px var(--green); flex-shrink:0; }
+  .sm-safe-text { font-size:0.8rem; color:var(--sub); font-weight:300; }
+
+  /* SECTION 공통 */
+  .section { padding:100px 48px; border-bottom:1px solid var(--border); }
+  .section.dark { background:var(--bg2); }
+  .section-inner { max-width:1000px; margin:0 auto; }
+  .section-label { font-family:'IBM Plex Mono',monospace; font-size:0.62rem; letter-spacing:5px; color:var(--off); margin-bottom:16px; }
+  .section-title { font-size:clamp(1.6rem,3vw,2.4rem); font-weight:900; line-height:1.3; margin-bottom:16px; }
+  .section-title em { color:var(--orange); font-style:normal; }
+  .section-title em.green { color:var(--green); }
+  .section-desc { font-size:0.95rem; color:var(--sub); line-height:1.9; font-weight:300; max-width:680px; margin-bottom:56px; }
+  .section-desc b { color:var(--text); font-weight:700; }
+
+  /* 기능 카드 */
+  .feature-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1px; background:var(--border); border:1px solid var(--border); }
+  .feature-card { background:var(--bg); padding:40px 36px; transition:background 0.3s; }
+  .section.dark .feature-card { background:var(--bg2); }
+  .feature-card:hover { background:#050505; }
+  .feature-icon { font-size:1.8rem; margin-bottom:16px; display: block; }
+  .feature-tag { font-family:'IBM Plex Mono',monospace; font-size:0.6rem; letter-spacing:3px; color:var(--orange); margin-bottom:12px; }
+  .feature-tag.green { color:var(--green); }
+  .feature-title { font-size:1rem; font-weight:700; margin-bottom:12px; color:var(--text); }
+  .feature-desc { font-size:0.82rem; color:var(--dim); line-height:1.8; font-weight:300; }
+
+  /* 법령 변화 섹션 */
+  .law-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1px; background:var(--border); border:1px solid var(--border); margin-top:48px; }
+  .law-item { background:var(--bg2); padding:36px 32px; position:relative; }
+  .law-item.urgent::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--red); }
+  .law-item.caution::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--yellow); }
+  .law-badge { font-family:'IBM Plex Mono',monospace; font-size:0.55rem; letter-spacing:2px; padding:3px 8px; display:inline-block; margin-bottom:16px; }
+  .law-item.urgent .law-badge { color:var(--red); border:1px solid rgba(255,68,68,0.3); }
+  .law-item.caution .law-badge { color:var(--yellow); border:1px solid rgba(255,170,0,0.3); }
+  .law-title { font-size:1rem; font-weight:700; margin-bottom:12px; color:var(--text); line-height:1.4; }
+  .law-desc { font-size:0.8rem; color:var(--dim); line-height:1.7; font-weight:300; }
+
+  /* 지역 커버리지 */
+  .coverage-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:8px; margin-top:48px; }
+  .coverage-item {
+    background:var(--bg2); border:1px solid var(--border);
+    padding:16px; text-align:center; border-radius:4px;
+    font-size:0.8rem; color:var(--sub); font-weight:300;
+    transition:border-color 0.2s;
+  }
+  .coverage-item:hover { border-color:var(--green); color:var(--text); }
+
+  /* 강조 블록 */
+  .highlight-block { border-left:2px solid var(--orange); padding:24px 32px; margin:40px 0; background:#050505; }
+  .highlight-block p { font-size:1rem; font-weight:700; color:var(--text); line-height:1.7; margin:0; }
+  .highlight-block em { color:var(--orange); font-style:normal; }
+  .highlight-block.green-border { border-left-color:var(--green); }
+  .highlight-block.green-border em { color:var(--green); }
+
+  /* CTA */
+  .cta { padding:120px 48px; text-align:center; }
+  .cta-label { font-family:'IBM Plex Mono',monospace; font-size:0.6rem; letter-spacing:5px; color:var(--off); margin-bottom:24px; }
+  .cta-title { font-size:clamp(1.8rem,3.5vw,2.8rem); font-weight:900; margin-bottom:16px; }
+  .cta-sub { color:var(--dim); font-size:0.9rem; font-weight:300; margin-bottom:48px; line-height:1.8; }
+  .btn { font-family:'IBM Plex Mono',monospace; font-size:0.8rem; letter-spacing:2px; text-decoration:none; display:inline-block; padding:16px 44px; transition:all 0.2s; }
+  .btn-green { background:var(--green); color:#000; font-weight:700; }
+  .btn-green:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(0,255,136,0.25); }
+  .btn-ghost { border:1px solid #333; color:var(--dim); margin-left:16px; }
+  .btn-ghost:hover { border-color:#666; color:var(--text); }
+
+  /* 페이지 네비 */
+  .page-nav { padding:48px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+  .page-nav a { font-family:'IBM Plex Mono',monospace; font-size:0.7rem; letter-spacing:2px; color:var(--dim); text-decoration:none; transition:color 0.2s; }
+  .page-nav a:hover { color:var(--green); }
+
+  /* FOOTER */
+  footer { padding:36px 48px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; }
+  .foot-logo { font-family:'IBM Plex Mono',monospace; font-size:0.75rem; letter-spacing:4px; color:var(--off); }
+  .foot-nav { display:flex; gap:28px; }
+  .foot-nav a { font-family:'IBM Plex Mono',monospace; font-size:0.6rem; letter-spacing:1px; color:#222; text-decoration:none; transition:color 0.2s; }
+  .foot-nav a:hover { color:var(--dim); }
+  .foot-copy { font-family:'IBM Plex Mono',monospace; font-size:0.6rem; color:#222; }
+
+  @keyframes up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  .reveal { opacity:0; transform:translateY(28px); transition:opacity 0.7s,transform 0.7s; }
+  .reveal.on { opacity:1; transform:translateY(0); }
+
+  @media(max-width:900px){
+    nav{padding:16px 20px;} .nav-menu{display:none;}
+    .hero{padding:120px 20px 60px;}
+    .hero-layout{grid-template-columns:1fr; gap:40px;}
+    .hero-mockup{display:none;}
+    .section{padding:60px 20px;}
+    .cta{padding:80px 20px;}
+    .page-nav{padding:28px 20px;flex-direction:column;gap:16px;text-align:center;}
+    footer{padding:28px 20px;flex-direction:column;align-items:flex-start;}
+    .btn-ghost{margin-left:0;margin-top:12px;}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo"><img src="logo.png" alt="Rider HUD"></div>
+  <ul class="nav-menu">
+    <li><a href="philosophy.html">철학</a></li>
+    <li><a href="index.html#modules" class="active">기능</a></li>
+    <li><a href="roadmap.html">로드맵</a></li>
+    <li><a href="install.html">설치</a></li>
+    <li><a href="https://riderhud.kr" class="nav-cta">앱 열기</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-layout">
+    <div class="hero-content">
+      <div class="hero-eyebrow">1.5단계 · SAFETY</div>
+      <h1 class="hero-h1">단속 걱정 없이<br><em>운행에 집중</em>하세요</h1>
+      <p class="hero-desc">
+        후면 단속 카메라는 보이지 않습니다.<br>
+        전면 번호판 의무화로 단속 리스크가 커졌습니다.<br>
+        <b>HUD가 먼저 알려드립니다.</b>
+      </p>
+    </div>
+    <div class="hero-mockup">
+      <div class="safety-mockup">
+        <div class="sm-header">
+          <div class="sm-title">H U D</div>
+          <div class="sm-date">2026.05.18 (월) · 26° 맑음</div>
+        </div>
+        <div class="sm-alert-rear">
+          <div class="sm-alert-tag">⚠️ 후면 단속 카메라</div>
+          <div class="sm-alert-text">후방 단속 구간<br>속도 주의</div>
+          <div class="sm-alert-dist">전방 200m · 제한속도 50km/h</div>
+        </div>
+        <div class="sm-alert-speed">
+          <div class="sm-alert-tag">📷 과속 단속 카메라</div>
+          <div class="sm-alert-text">고정식 단속 카메라<br>구간 진입</div>
+          <div class="sm-alert-dist">전방 500m · 제한속도 60km/h</div>
+        </div>
+        <div class="sm-safe">
+          <div class="sm-safe-dot"></div>
+          <div class="sm-safe-text">현재 구간 안전 · 정상 운행 중</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 문제 제기 -->
+<section class="section dark">
+  <div class="section-inner">
+    <div class="section-label reveal">THE PROBLEM</div>
+    <h2 class="section-title reveal">후면 단속은 <em>보이지 않습니다</em></h2>
+    <p class="section-desc reveal">
+      전면 단속 카메라는 보이지만 후면은 지나쳐야 압니다.<br>
+      단속된 후에야 알게 됩니다. 그때는 이미 늦었습니다.<br>
+      배달에 집중하다 보면 단속 구간을 놓치기 쉽습니다.
+    </p>
+    <div class="feature-grid reveal">
+      <div class="feature-card">
+        <span class="feature-icon">📷</span>
+        <div class="feature-tag">후면 단속</div>
+        <div class="feature-title">지나쳐야 보입니다</div>
+        <div class="feature-desc">후면 단속 카메라는 앞에서 보이지 않습니다. 이미 지나친 후에야 찍혔다는 걸 압니다.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🏍️</span>
+        <div class="feature-tag">전면 번호판 의무화</div>
+        <div class="feature-title">단속 리스크가 커졌습니다</div>
+        <div class="feature-desc">전면 번호판 부착 의무화로 전면 카메라 단속도 피할 수 없게 됐습니다. 모든 방향에서 단속됩니다.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🔔</span>
+        <div class="feature-tag">인지 부하</div>
+        <div class="feature-title">배달 중엔 집중이 분산됩니다</div>
+        <div class="feature-desc">콜 확인, 길 찾기, 시간 관리까지 신경 쓰다 보면 단속 구간을 놓칩니다. 사고 위험도 커집니다.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 솔루션 -->
+<section class="section">
+  <div class="section-inner">
+    <div class="section-label reveal">THE SOLUTION</div>
+    <h2 class="section-title reveal"><em class="green">먼저 알려드립니다</em></h2>
+    <p class="section-desc reveal">
+      단속 구간에 접근하면 <b>자동으로 음성 안내</b>가 시작됩니다.<br>
+      화면을 볼 필요 없습니다. 헬멧 쓴 채로 들을 수 있습니다.
+    </p>
+    <div class="feature-grid reveal">
+      <div class="feature-card">
+        <span class="feature-icon">🔊</span>
+        <div class="feature-tag green">음성 사전 안내</div>
+        <div class="feature-title">접근 전에 알려줍니다</div>
+        <div class="feature-desc">단속 구간 진입 전 TTS 음성으로 먼저 안내합니다. 화면을 보지 않아도 됩니다. 운전에 집중할 수 있습니다.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📡</span>
+        <div class="feature-tag green">전국 데이터 내장</div>
+        <div class="feature-title">서버 없이 작동합니다</div>
+        <div class="feature-desc">전국 17개 시도 단속 카메라 데이터가 앱 안에 내장돼 있습니다. 인터넷 없이도 작동합니다.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🔄</span>
+        <div class="feature-tag green">후면 + 과속 동시</div>
+        <div class="feature-title">모든 유형을 안내합니다</div>
+        <div class="feature-desc">후면 단속 카메라, 고정식 과속 카메라, 구간 단속 구간을 모두 안내합니다.</div>
+      </div>
+    </div>
+    <div class="highlight-block green-border reveal">
+      <p>단속 카메라 데이터는 <em>앱 안에 내장</em>됩니다.<br>서버로 전송되지 않습니다. 인터넷이 없어도 작동합니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 법령 변화 -->
+<section class="section dark">
+  <div class="section-inner">
+    <div class="section-label reveal">MARKET CHANGE</div>
+    <h2 class="section-title reveal">배달 시장이 <em>바뀌고 있습니다</em></h2>
+    <p class="section-desc reveal">
+      앞으로 라이더에게 닥칠 변화들입니다.<br>
+      미리 알고 준비하는 라이더가 살아남습니다.
+    </p>
+    <div class="law-grid reveal">
+      <div class="law-item caution">
+        <span class="law-badge">검토 중</span>
+        <div class="law-title">전면 번호판 부착 도입 검토</div>
+        <div class="law-desc">현재 도입이 검토 중입니다. 시행된다면 전면 카메라 단속을 피할 수 없게 됩니다. 지금부터 준비하는 것이 유리합니다.</div>
+      </div>
+      <div class="law-item urgent">
+        <span class="law-badge">시행 예정</span>
+        <div class="law-title">유상운송 보험 의무화</div>
+        <div class="law-desc">배달 중 사고 시 유상운송 보험 미가입이면 보상을 받을 수 없습니다. 비용 증가가 예상됩니다.</div>
+      </div>
+      <div class="law-item caution">
+        <span class="law-badge">진행 중</span>
+        <div class="law-title">배달 플랫폼 구조 변화</div>
+        <div class="law-desc">배민 매각, 플랫폼 간 경쟁 심화로 수수료 구조와 배차 정책이 바뀔 수 있습니다.</div>
+      </div>
+      <div class="law-item caution">
+        <span class="law-badge">진행 중</span>
+        <div class="law-title">24시간 배달 · 무료 배달</div>
+        <div class="law-desc">심야 배달 수요 증가와 무료 배달 경쟁으로 라이더 운행 패턴이 달라지고 있습니다.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 전국 커버리지 -->
+<section class="section">
+  <div class="section-inner">
+    <div class="section-label reveal">COVERAGE</div>
+    <h2 class="section-title reveal">전국 <em class="green">17개 시도</em> 커버</h2>
+    <p class="section-desc reveal">
+      전국 모든 지역의 단속 카메라 데이터가 내장돼 있습니다.<br>
+      어디서 운행하든 안내받을 수 있습니다.
+    </p>
+    <div class="coverage-grid reveal">
+      <div class="coverage-item">서울</div>
+      <div class="coverage-item">경기</div>
+      <div class="coverage-item">인천</div>
+      <div class="coverage-item">부산</div>
+      <div class="coverage-item">대구</div>
+      <div class="coverage-item">광주</div>
+      <div class="coverage-item">대전</div>
+      <div class="coverage-item">울산</div>
+      <div class="coverage-item">세종</div>
+      <div class="coverage-item">강원</div>
+      <div class="coverage-item">충북</div>
+      <div class="coverage-item">충남</div>
+      <div class="coverage-item">전북</div>
+      <div class="coverage-item">전남</div>
+      <div class="coverage-item">경북</div>
+      <div class="coverage-item">경남</div>
+      <div class="coverage-item">제주</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <div class="cta-label reveal">FREE · PWA · NO APP STORE</div>
+  <h2 class="cta-title reveal">지금 바로 시작하세요</h2>
+  <p class="cta-sub reveal">앱스토어 설치 불필요. 브라우저에서 바로 실행됩니다.</p>
+  <div class="reveal">
+    <a href="https://riderhud.kr" class="btn btn-green">앱 열기 →</a>
+    <a href="index.html" class="btn btn-ghost">홈으로</a>
+  </div>
+</section>
+
+<!-- 페이지 네비 -->
+<div class="page-nav">
+  <a href="hud.html">← HUD</a>
+  <a href="manager.html">다음 · Manager →</a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot-logo">HUD for Riders</div>
+  <nav class="foot-nav">
+    <a href="philosophy.html">철학</a>
+    <a href="hud.html">HUD</a>
+    <a href="manager.html">Manager</a>
+    <a href="heatmap.html">Heatmap</a>
+    <a href="roadmap.html">Roadmap</a>
+    <a href="install.html">설치</a>
+  </nav>
+  <div class="foot-copy">© 2026 Smart Tool Korea · riderhud.kr</div>
+</footer>
+
+<script>
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('on'); });
+  }, {threshold:0.1});
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>

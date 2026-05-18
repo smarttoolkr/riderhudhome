@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manager — Rider HUD</title>
+<meta name="description" content="실질 시급, 공차율, 플랫폼별 수익 비교. 감이 아니라 숫자로 운행하세요.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;700&family=Noto+Sans+KR:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #00ff88;
+    --bg: #000;
+    --bg2: #060606;
+    --text: #fff;
+    --sub: #aaa;
+    --dim: #777;
+    --off: #444;
+    --border: #111;
+    --yellow: #ffaa00;
+    --red: #ff4444;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { background:var(--bg); color:var(--text); font-family:'Noto Sans KR',sans-serif; overflow-x:hidden; }
+
+  /* NAV */
+  nav {
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    padding:18px 48px;
+    display:flex; justify-content:space-between; align-items:center;
+    background:rgba(0,0,0,0.95); backdrop-filter:blur(20px);
+    border-bottom:1px solid var(--border);
+  }
+  .nav-logo img { height:32px; }
+  .nav-menu { display:flex; gap:36px; list-style:none; align-items:center; }
+  .nav-menu a { font-family:'IBM Plex Mono',monospace; font-size:0.7rem; letter-spacing:2px; color:var(--dim); text-decoration:none; transition:color 0.2s; }
+  .nav-menu a:hover { color:var(--text); }
+  .nav-menu a.active { color:var(--green); }
+  .nav-cta { background:var(--green)!important; color:#000!important; padding:10px 24px; font-weight:700!important; }
+
+  /* HERO */
+  .hero {
+    min-height:80vh; display:flex; flex-direction:column;
+    justify-content:center; padding:160px 48px 80px;
+    position:relative; overflow:hidden;
+    border-bottom:1px solid var(--border);
+  }
+  .hero-grid {
+    position:absolute; inset:0;
+    background-image:
+      linear-gradient(rgba(0,255,136,0.02) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(0,255,136,0.02) 1px,transparent 1px);
+    background-size:64px 64px; pointer-events:none;
+  }
+  .hero-glow {
+    position:absolute; top:10%; right:5%;
+    width:50vw; height:70vh;
+    background:radial-gradient(ellipse,rgba(0,255,136,0.04) 0%,transparent 65%);
+    pointer-events:none;
+  }
+  .hero-layout {
+    position:relative;
+    display:grid; grid-template-columns:1fr 1fr;
+    gap:80px; align-items:center; max-width:1100px;
+  }
+  .hero-eyebrow { font-family:'IBM Plex Mono',monospace; font-size:0.65rem; letter-spacing:5px; color:var(--green); margin-bottom:24px; opacity:0; animation:up 0.7s 0.2s forwards; }
+  .hero-h1 { font-size:clamp(2.2rem,4.5vw,3.6rem); font-weight:900; line-height:1.2; margin-bottom:28px; opacity:0; animation:up 0.7s 0.35s forwards; }
+  .hero-h1 em { color:var(--green); font-style:normal; }
+  .hero-desc { font-size:0.95rem; color:var(--sub); line-height:1.9; font-weight:300; margin-bottom:40px; opacity:0; animation:up 0.7s 0.5s forwards; }
+  .hero-desc b { color:var(--text); font-weight:700; }
+
+  /* Manager 목업 */
+  .hero-mockup { opacity:0; animation:up 0.7s 0.4s forwards; }
+  .mgr-mockup {
+    width:100%; max-width:300px; margin:0 auto;
+    background:#0d0d0d; border-radius:20px;
+    border:1px solid #1e1e1e; padding:24px;
+    box-shadow:0 32px 80px rgba(0,0,0,0.9);
+    position:relative;
+  }
+  .mgr-mockup::before {
+    content:''; position:absolute; inset:0; border-radius:20px;
+    background:radial-gradient(ellipse at 50% 0%,rgba(0,255,136,0.06) 0%,transparent 55%);
+    pointer-events:none;
+  }
+  .mgr-header { margin-bottom:16px; }
+  .mgr-title { font-family:'IBM Plex Mono',monospace; color:var(--green); font-size:0.85rem; letter-spacing:3px; font-weight:700; }
+  .mgr-tabs { display:flex; gap:6px; margin-bottom:16px; }
+  .mgr-tab { flex:1; padding:8px 4px; border-radius:6px; text-align:center; font-size:0.65rem; font-weight:700; background:#1a1a1a; border:1px solid #222; color:var(--off); font-family:'IBM Plex Mono',monospace; }
+  .mgr-tab.active { background:#0a1f0a; border-color:var(--green); color:var(--green); }
+  .mgr-main {
+    background:#0a1f0a; border:1px solid rgba(0,255,136,0.25);
+    border-radius:12px; padding:20px; margin-bottom:12px; text-align:center;
+  }
+  .mgr-main-label { font-size:0.58rem; letter-spacing:3px; color:var(--green); margin-bottom:8px; font-family:'IBM Plex Mono',monospace; }
+  .mgr-main-value { font-size:2.4rem; font-weight:900; color:var(--green); font-family:'IBM Plex Mono',monospace; letter-spacing:-1px; }
+  .mgr-main-unit { font-size:0.9rem; color:var(--dim); }
+  .mgr-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:12px; }
+  .mgr-cell { background:#111; border-radius:8px; padding:12px; border:1px solid #1a1a1a; }
+  .mgr-cell-label { font-size:0.55rem; color:var(--off); margin-bottom:4px; letter-spacing:1px; }
+  .mgr-cell-value { font-size:0.95rem; font-weight:700; color:var(--sub); font-family:'IBM Plex Mono',monospace; }
+  .mgr-cell-value.green { color:var(--green); }
+  .mgr-cell-value.orange { color:var(--yellow); }
+  .mgr-time { background:#111; border-radius:8px; padding:12px; border:1px solid #1a1a1a; }
+  .mgr-time-label { font-size:0.55rem; color:var(--off); margin-bottom:8px; letter-spacing:1px; }
+  .mgr-time-bars { display:flex; gap:4px; align-items:flex-end; height:32px; }
+  .mgr-bar { flex:1; border-radius:2px 2px 0 0; }
+  .mgr-bar.work { background:var(--green); opacity:0.8; }
+  .mgr-bar.rest { background:var(--yellow); opacity:0.6; }
+  .mgr-bar.empty { background:var(--red); opacity:0.5; }
+
+  /* SECTION 공통 */
+  .section { padding:100px 48px; border-bottom:1px solid var(--border); }
+  .section.dark { background:var(--bg2); }
+  .section-inner { max-width:1000px; margin:0 auto; }
+  .section-label { font-family:'IBM Plex Mono',monospace; font-size:0.62rem; letter-spacing:5px; color:var(--off); margin-bottom:16px; }
+  .section-title { font-size:clamp(1.6rem,3vw,2.4rem); font-weight:900; line-height:1.3; margin-bottom:16px; }
+  .section-title em { color:var(--green); font-style:normal; }
+  .section-desc { font-size:0.95rem; color:var(--sub); line-height:1.9; font-weight:300; max-width:680px; margin-bottom:56px; }
+  .section-desc b { color:var(--text); font-weight:700; }
+
+  /* 기능 카드 */
+  .feature-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1px; background:var(--border); border:1px solid var(--border); }
+  .feature-card { background:var(--bg); padding:40px 36px; transition:background 0.3s; }
+  .section.dark .feature-card { background:var(--bg2); }
+  .feature-card:hover { background:#050505; }
+  .feature-icon { font-size:1.8rem; margin-bottom:16px; display:block; }
+  .feature-tag { font-family:'IBM Plex Mono',monospace; font-size:0.6rem; letter-spacing:3px; color:var(--green); margin-bottom:12px; }
+  .feature-title { font-size:1rem; font-weight:700; margin-bottom:12px; color:var(--text); }
+  .feature-desc { font-size:0.82rem; color:var(--dim); line-height:1.8; font-weight:300; }
+
+  /* 비교표 */
+  .compare-grid {
+    display:grid; grid-template-columns:1fr 1fr;
+    gap:1px; background:var(--border); border:1px solid var(--border); margin-bottom:40px;
+  }
+  .compare-col { padding:36px 32px; }
+  .compare-col.bad { background:var(--bg2); }
+  .compare-col.good { background:#040a04; }
+  .compare-label { font-family:'IBM Plex Mono',monospace; font-size:0.6rem; letter-spacing:3px; margin-bottom:24px; }
+  .compare-col.bad .compare-label { color:var(--off); }
+  .compare-col.good .compare-label { color:var(--green); }
+  .compare-row { padding:12px 0; border-bottom:1px solid var(--border); font-size:0.88rem; line-height:1.6; font-weight:300; }
+  .compare-col.bad .compare-row { color:var(--off); }
+  .compare-col.good .compare-row { color:var(--sub); }
+  .compare-row:last-child { border-bottom:none; }
+
+  /* 플랫폼 비교 */
+  .platform-grid {
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:1px; background:var(--border); border:1px solid var(--border); margin-top:48px;
+  }
+  .platform-item { background:var(--bg2); padding:32px 28px; text-align:center; }
+  .platform-name { font-size:0.9rem; font-weight:700; color:var(--text); margin-bottom:16px; }
+  .platform-value { font-family:'IBM Plex Mono',monospace; font-size:1.6rem; font-weight:700; color:var(--green); margin-bottom:4px; }
+  .platform-label { font-size:0.65rem; color:var(--off); letter-spacing:1px; }
+
+  /* 강조 블록 */
+  .highlight-block { border-left:2px solid var(--green); padding:24px 32px; margin:40px 0; background:#050505; }
+  .highlight-block p { font-size:1rem; font-weight:700; color:var(--text); line-height:1.7; margin:0; }
+  .highlight-block em { color:var(--green); font-style:normal; }
+
+  /* 무료/유료 */
+  .pricing-grid {
+    display:grid; grid-template-columns:1fr 1fr;
+    gap:1px; background:var(--border); border:1px solid var(--border); margin-top:48px;
+  }
+  .pricing-col { padding:48px 40px; position:relative; }
+  .pricing-col.free { background:var(--bg2); }
+  .pricing-col.pro { background:#040a04; }
+  .pricing-col.pro::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--green); }
+  .pricing-badge { font-family:'IBM Plex Mono',monospace; font-size:0.6rem; letter-spacing:3px; margin-bottom:20px; display:inline-block; padding:4px 10px; }
+  .pricing-col.free .pricing-badge { color:var(--off); border:1px solid #222; }
+  .pricing-col.pro .pricing-badge { color:var(--green); border:1px solid rgba(0,255,136,0.3); }
+  .pricing-title { font-size:1.4rem; font-weight:900; margin-bottom:8px; }
+  .pricing-price { font-family:'IBM Plex Mono',monospace; font-size:1rem; color:var(--dim); margin-bottom:28px; }
+  .pricing-col.pro .pricing-price { color:var(--green); }
+  .pricing-list { display:flex; flex-direction:column; gap:10px; }
+  .pricing-item { display:flex; align-items:center; gap:10px; font-size:0.82rem; color:var(--sub); font-weight:300; }
+  .pricing-item::before { content:'→'; color:var(--green); font-family:'IBM Plex Mono',monospace; font-size:0.65rem; flex-shrink:0; }
+  .pricing-col.free .pricing-item { color:var(--dim); }
+  .pricing-col.free .pricing-item::before { color:var(--off); }
+
+  /* CTA */
+  .cta { padding:120px 48px; text-align:center; }
+  .cta-label { font-family:'IBM Plex Mono',monospace; font-size:0.6rem; letter-spacing:5px; color:var(--off); margin-bottom:24px; }
+  .cta-title { font-size:clamp(1.8rem,3.5vw,2.8rem); font-weight:900; margin-bottom:16px; }
+  .cta-sub { color:var(--dim); font-size:0.9rem; font-weight:300; margin-bottom:48px; line-height:1.8; }
+  .btn { font-family:'IBM Plex Mono',monospace; font-size:0.8rem; letter-spacing:2px; text-decoration:none; display:inline-block; padding:16px 44px; transition:all 0.2s; }
+  .btn-green { background:var(--green); color:#000; font-weight:700; }
+  .btn-green:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(0,255,136,0.25); }
+  .btn-ghost { border:1px solid #333; color:var(--dim); margin-left:16px; }
+  .btn-ghost:hover { border-color:#666; color:var(--text); }
+
+  /* 페이지 네비 */
+  .page-nav { padding:48px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+  .page-nav a { font-family:'IBM Plex Mono',monospace; font-size:0.7rem; letter-spacing:2px; color:var(--dim); text-decoration:none; transition:color 0.2s; }
+  .page-nav a:hover { color:var(--green); }
+
+  /* FOOTER */
+  footer { padding:36px 48px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; }
+  .foot-logo { font-family:'IBM Plex Mono',monospace; font-size:0.75rem; letter-spacing:4px; color:var(--off); }
+  .foot-nav { display:flex; gap:28px; }
+  .foot-nav a { font-family:'IBM Plex Mono',monospace; font-size:0.6rem; letter-spacing:1px; color:#222; text-decoration:none; transition:color 0.2s; }
+  .foot-nav a:hover { color:var(--dim); }
+  .foot-copy { font-family:'IBM Plex Mono',monospace; font-size:0.6rem; color:#222; }
+
+  @keyframes up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  .reveal { opacity:0; transform:translateY(28px); transition:opacity 0.7s,transform 0.7s; }
+  .reveal.on { opacity:1; transform:translateY(0); }
+
+  @media(max-width:900px){
+    nav{padding:16px 20px;} .nav-menu{display:none;}
+    .hero{padding:120px 20px 60px;}
+    .hero-layout{grid-template-columns:1fr; gap:40px;}
+    .hero-mockup{display:none;}
+    .section{padding:60px 20px;}
+    .compare-grid{grid-template-columns:1fr;}
+    .pricing-grid{grid-template-columns:1fr;}
+    .cta{padding:80px 20px;}
+    .page-nav{padding:28px 20px;flex-direction:column;gap:16px;text-align:center;}
+    footer{padding:28px 20px;flex-direction:column;align-items:flex-start;}
+    .btn-ghost{margin-left:0;margin-top:12px;}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo"><img src="logo.png" alt="Rider HUD"></div>
+  <ul class="nav-menu">
+    <li><a href="philosophy.html">철학</a></li>
+    <li><a href="index.html#modules" class="active">기능</a></li>
+    <li><a href="roadmap.html">로드맵</a></li>
+    <li><a href="install.html">설치</a></li>
+    <li><a href="https://riderhud.kr" class="nav-cta">앱 열기</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-layout">
+    <div class="hero-content">
+      <div class="hero-eyebrow">02 / 03 · MANAGER</div>
+      <h1 class="hero-h1">감이 아니라<br><em>숫자로 운행</em>하세요</h1>
+      <p class="hero-desc">
+        오늘 10시간 일해서 15만원 벌었습니다.<br>
+        그런데 실질 시급이 얼마인지 모릅니다.<br>
+        <b>Manager가 자동으로 계산합니다.</b>
+      </p>
+    </div>
+    <div class="hero-mockup">
+      <div class="mgr-mockup">
+        <div class="mgr-header">
+          <div class="mgr-title">MANAGER · 통계 · 수익</div>
+        </div>
+        <div class="mgr-tabs">
+          <div class="mgr-tab active">오늘</div>
+          <div class="mgr-tab">주간</div>
+          <div class="mgr-tab">월간</div>
+          <div class="mgr-tab">전체</div>
+        </div>
+        <div class="mgr-main">
+          <div class="mgr-main-label">⚡ 실시급 · 순작업시간당</div>
+          <div class="mgr-main-value">₩23,897<span class="mgr-main-unit">/h</span></div>
+        </div>
+        <div class="mgr-grid">
+          <div class="mgr-cell">
+            <div class="mgr-cell-label">총 시급</div>
+            <div class="mgr-cell-value">₩18,240</div>
+          </div>
+          <div class="mgr-cell">
+            <div class="mgr-cell-label">공차율</div>
+            <div class="mgr-cell-value orange">13%</div>
+          </div>
+          <div class="mgr-cell">
+            <div class="mgr-cell-label">건당 수입</div>
+            <div class="mgr-cell-value green">₩4,850</div>
+          </div>
+          <div class="mgr-cell">
+            <div class="mgr-cell-label">조리 대기</div>
+            <div class="mgr-cell-value">8분</div>
+          </div>
+        </div>
+        <div class="mgr-time">
+          <div class="mgr-time-label">시간 분해</div>
+          <div class="mgr-time-bars">
+            <div class="mgr-bar work" style="height:100%"></div>
+            <div class="mgr-bar work" style="height:85%"></div>
+            <div class="mgr-bar rest" style="height:40%"></div>
+            <div class="mgr-bar work" style="height:90%"></div>
+            <div class="mgr-bar empty" style="height:20%"></div>
+            <div class="mgr-bar work" style="height:95%"></div>
+            <div class="mgr-bar work" style="height:75%"></div>
+            <div class="mgr-bar rest" style="height:30%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 문제 제기 -->
+<section class="section dark">
+  <div class="section-inner">
+    <div class="section-label reveal">THE PROBLEM</div>
+    <h2 class="section-title reveal">라이더는 자신의 <em>시급을 모릅니다</em></h2>
+    <p class="section-desc reveal">
+      하루 종일 일했는데 실제로 얼마를 버는지 정확히 아는 라이더가 없습니다.<br>
+      배달 가계부를 써봤지만 3일을 못 넘겼습니다.<br>
+      만신창이 몸으로 귀가해서 매일 입력할 에너지가 없었습니다.
+    </p>
+    <div class="compare-grid reveal">
+      <div class="compare-col bad">
+        <div class="compare-label">라이더가 아는 것</div>
+        <div class="compare-row">오늘 몇 시간 일했다</div>
+        <div class="compare-row">총 얼마 들어왔다</div>
+        <div class="compare-row">미션 보너스가 있었다</div>
+        <div class="compare-row">쿠팡이 좀 더 나은 것 같다</div>
+        <div class="compare-row">비수기엔 확실히 적다</div>
+      </div>
+      <div class="compare-col good">
+        <div class="compare-label">Manager가 알려주는 것</div>
+        <div class="compare-row">실질 시급 (순작업시간당)</div>
+        <div class="compare-row">공차 비율 · 낭비 시간</div>
+        <div class="compare-row">미션이 실제로 이득인지</div>
+        <div class="compare-row">플랫폼별 정확한 수익 비교</div>
+        <div class="compare-row">시간대별 효율 분석</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 솔루션 - 핵심 기능 -->
+<section class="section">
+  <div class="section-inner">
+    <div class="section-label reveal">THE SOLUTION</div>
+    <h2 class="section-title reveal">입력은 최소,<br><em>분석은 자동</em></h2>
+    <p class="section-desc reveal">
+      수입만 입력하면 나머지는 자동 계산됩니다.<br>
+      오늘 어디서 시간을 낭비했는지 숫자로 보입니다.
+    </p>
+    <div class="feature-grid reveal">
+      <div class="feature-card">
+        <span class="feature-icon">⚡</span>
+        <div class="feature-tag">실시급</div>
+        <div class="feature-title">순작업시간당 시급</div>
+        <div class="feature-desc">총 시급이 아닌 실제 일한 시간 기준 시급입니다. 대기·휴식 시간을 제외한 진짜 시급을 보여줍니다.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🚗</span>
+        <div class="feature-tag">공차율</div>
+        <div class="feature-title">낭비 시간을 수치로</div>
+        <div class="feature-desc">콜 없이 이동한 시간 비율입니다. 공차율이 높으면 동선 전략을 바꿔야 한다는 신호입니다.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📊</span>
+        <div class="feature-tag">시간 분해</div>
+        <div class="feature-title">실근무 · 휴식 · 공차</div>
+        <div class="feature-desc">오늘 일한 시간이 어떻게 쪼개졌는지 한눈에 봅니다. 어디서 시간을 잃었는지 바로 알 수 있습니다.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🏆</span>
+        <div class="feature-tag">최고 기록</div>
+        <div class="feature-title">내 베스트 기록</div>
+        <div class="feature-desc">최고 수입일, 최고 시급일을 자동으로 기록합니다. 그날의 조건을 분석해 전략을 세울 수 있습니다.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 플랫폼 비교 -->
+<section class="section dark">
+  <div class="section-inner">
+    <div class="section-label reveal">PLATFORM COMPARE</div>
+    <h2 class="section-title reveal">쿠팡이 나은지<br><em>배민이 나은지 데이터로</em></h2>
+    <p class="section-desc reveal">
+      감으로 "쿠팡이 좀 더 나은 것 같다"가 아닙니다.<br>
+      플랫폼별 실제 시급을 숫자로 비교합니다.<br>
+      리워드냐 미션이냐, 어떤 전략이 나에게 맞는지 데이터가 말해줍니다.
+    </p>
+    <div class="platform-grid reveal">
+      <div class="platform-item">
+        <div class="platform-name">배달의민족</div>
+        <div class="platform-value">₩21,400</div>
+        <div class="platform-label">실시급 /h</div>
+      </div>
+      <div class="platform-item">
+        <div class="platform-name">쿠팡이츠</div>
+        <div class="platform-value">₩23,897</div>
+        <div class="platform-label">실시급 /h</div>
+      </div>
+      <div class="platform-item">
+        <div class="platform-name">일반대행</div>
+        <div class="platform-value">₩19,200</div>
+        <div class="platform-label">실시급 /h</div>
+      </div>
+    </div>
+    <div class="highlight-block reveal">
+      <p>플랫폼 선택은 <em>내 데이터가 결정</em>합니다.<br>같은 지역, 같은 시간대라도 라이더마다 결과가 다릅니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 미션 분석 -->
+<section class="section">
+  <div class="section-inner">
+    <div class="section-label reveal">MISSION ANALYSIS</div>
+    <h2 class="section-title reveal">미션이 실제로<br><em>이득인지 계산합니다</em></h2>
+    <p class="section-desc reveal">
+      미션 시급은 높아 보입니다.<br>
+      그러나 쫓기는 스트레스, 무리한 동선, 컨디션 소모가 있습니다.<br>
+      Manager는 미션 구간의 실제 효율을 계산합니다.
+    </p>
+    <div class="feature-grid reveal">
+      <div class="feature-card">
+        <span class="feature-icon">⏰</span>
+        <div class="feature-tag">미션 시급</div>
+        <div class="feature-title">미션 구간 실제 시급</div>
+        <div class="feature-desc">미션 보너스 포함 실제 시급을 계산합니다. 보너스가 높아도 건당 시간이 길면 실시급은 낮을 수 있습니다.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🎯</span>
+        <div class="feature-tag">달성률</div>
+        <div class="feature-title">미션 달성 패턴 분석</div>
+        <div class="feature-desc">미션을 얼마나 자주 달성하는지 기록됩니다. 달성이 어려운 미션은 피하는 게 낫습니다.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📈</span>
+        <div class="feature-tag">리워드 vs 미션</div>
+        <div class="feature-title">나에게 맞는 전략</div>
+        <div class="feature-desc">리워드 등급 유지와 미션 집중 중 어느 쪽이 나에게 더 효율적인지 데이터로 비교합니다.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 무료/유료 -->
+<section class="section dark">
+  <div class="section-inner">
+    <div class="section-label reveal">PRICING</div>
+    <h2 class="section-title reveal">기본은 <em>영구 무료</em>입니다</h2>
+    <p class="section-desc reveal">
+      수동 입력 버전은 영구 무료입니다.<br>
+      자동화가 필요해지면 그때 선택하면 됩니다.
+    </p>
+    <div class="pricing-grid reveal">
+      <div class="pricing-col free">
+        <span class="pricing-badge">FREE</span>
+        <div class="pricing-title">수동 입력</div>
+        <div class="pricing-price">영구 무료</div>
+        <div class="pricing-list">
+          <div class="pricing-item">수입 직접 입력</div>
+          <div class="pricing-item">실시급 · 공차율 계산</div>
+          <div class="pricing-item">플랫폼별 수익 비교</div>
+          <div class="pricing-item">주간 · 월간 통계</div>
+          <div class="pricing-item">백업 · 복원</div>
+        </div>
+      </div>
+      <div class="pricing-col pro">
+        <span class="pricing-badge">PRO</span>
+        <div class="pricing-title">자동 입력</div>
+        <div class="pricing-price">준비 중</div>
+        <div class="pricing-list">
+          <div class="pricing-item">콜 자동 감지 · 기록</div>
+          <div class="pricing-item">정산 자동 완성</div>
+          <div class="pricing-item">입력 없이 모든 통계</div>
+          <div class="pricing-item">AI 인사이트</div>
+          <div class="pricing-item">세금 신고 자료 자동 생성</div>
+        </div>
+      </div>
+    </div>
+    <div class="highlight-block reveal">
+      <p>입력이 귀찮아지면<br><em>그때 자동화로 전환하세요.</em><br>체험 후 결정하면 됩니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <div class="cta-label reveal">FREE · PWA · NO APP STORE</div>
+  <h2 class="cta-title reveal">지금 바로 시작하세요</h2>
+  <p class="cta-sub reveal">앱스토어 설치 불필요. 브라우저에서 바로 실행됩니다.</p>
+  <div class="reveal">
+    <a href="https://riderhud.kr" class="btn btn-green">앱 열기 →</a>
+    <a href="index.html" class="btn btn-ghost">홈으로</a>
+  </div>
+</section>
+
+<!-- 페이지 네비 -->
+<div class="page-nav">
+  <a href="safety.html">← 안전 보조</a>
+  <a href="heatmap.html">다음 · Heatmap →</a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot-logo">HUD for Riders</div>
+  <nav class="foot-nav">
+    <a href="philosophy.html">철학</a>
+    <a href="hud.html">HUD</a>
+    <a href="manager.html">Manager</a>
+    <a href="heatmap.html">Heatmap</a>
+    <a href="roadmap.html">Roadmap</a>
+    <a href="install.html">설치</a>
+  </nav>
+  <div class="foot-copy">© 2026 Smart Tool Korea · riderhud.kr</div>
+</footer>
+
+<script>
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('on'); });
+  }, {threshold:0.1});
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
