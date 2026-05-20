@@ -411,10 +411,10 @@
     border:none;
   }
 
-  /* 모바일 전용 기능 이미지 */
-  .mobile-features { display:none; padding:60px 20px; background:var(--bg2); border-top:1px solid var(--border); }
-  .mobile-features-inner { max-width:500px; margin:0 auto; }
-  .mobile-img-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:32px; }
+  /* 기능 이미지 섹션 */
+  .mobile-features { display:block; padding:100px 48px; background:var(--bg2); border-top:1px solid var(--border); }
+  .mobile-features-inner { max-width:1000px; margin:0 auto; }
+  .mobile-img-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:48px; }
   .mobile-img-grid img { width:100%; border-radius:12px; }
 
   @keyframes up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
@@ -441,7 +441,7 @@
     .manifesto{padding:60px 20px;} .manifesto-list{grid-template-columns:1fr;}
     .roadmap{padding:60px 20px;}
     .roadmap-steps{grid-template-columns:1fr;}
-    .mobile-features{display:block;}
+    .mobile-img-grid{gap:12px;}
     .cta{padding:60px 20px;}
     .cta-title{font-size:clamp(1.6rem,6vw,2.4rem);}
     footer{padding:28px 20px;flex-direction:column;align-items:flex-start;gap:20px;}
@@ -492,6 +492,20 @@
   </div>
   <div class="hero-image">
     <img src="hero.jpg" alt="라이더 HUD - 내가 흘린 땀의 가치, 라이더가 소유합니다">
+  </div>
+</section>
+
+<!-- 핵심 기능 4 -->
+<section class="mobile-features">
+  <div class="mobile-features-inner">
+    <div class="section-label reveal">CORE FEATURES</div>
+    <h2 class="section-title reveal">라이더 HUD <em>핵심 기능 4</em></h2>
+    <div class="mobile-img-grid reveal">
+      <img src="stamp.png" alt="타임스탬프 증빙">
+      <img src="parking.png" alt="미로 주차장 탈출">
+      <img src="safety-img.png" alt="후면 단속 카메라">
+      <img src="pin.png" alt="GPS 핀 메모 TTS">
+    </div>
   </div>
 </section>
 
@@ -691,20 +705,6 @@
   </div>
 
 </div>
-
-<!-- 모바일 전용 기능 이미지 -->
-<section class="mobile-features">
-  <div class="mobile-features-inner">
-    <div class="section-label reveal">FEATURES IN ACTION</div>
-    <h2 class="section-title reveal">실제로 <em>이렇게 작동합니다</em></h2>
-    <div class="mobile-img-grid reveal">
-      <img src="feature1.png" alt="라이더 필수 기능 4가지">
-      <img src="feature2.png" alt="배달하다 와 미쳤다 소리 나오는 순간">
-      <img src="stamp.png" alt="타임스탬프 증빙">
-      <img src="parking.png" alt="미로 주차장 탈출">
-    </div>
-  </div>
-</section>
 
 <!-- MANIFESTO -->
 <section class="manifesto">
