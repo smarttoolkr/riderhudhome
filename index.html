@@ -55,7 +55,7 @@
   /* HERO */
   .hero {
     min-height:calc(100vh - 64px);
-    display:grid; grid-template-columns:1fr 1fr;
+    display:grid; grid-template-columns:6fr 4fr;
     align-items:center;
     padding:80px 48px;
     position:relative; overflow:hidden;
@@ -96,11 +96,11 @@
   }
   .hero-h1 em { color:var(--green); font-style:normal; }
   .hero-desc {
-    font-size:1rem; color:var(--sub); line-height:1.7; font-weight:300;
-    max-width:520px; margin-bottom:52px;
+    font-size:1.05rem; color:#bbb; line-height:1.8; font-weight:300;
+    max-width:540px; margin-bottom:52px;
     opacity:0; animation:up 0.7s 0.5s forwards;
   }
-  .hero-desc b { color:var(--text); font-weight:700; }
+  .hero-desc b { color:#fff; font-weight:700; }
   .hero-actions {
     display:flex; gap:16px; flex-wrap:wrap;
     opacity:0; animation:up 0.7s 0.65s forwards;
@@ -115,26 +115,27 @@
   .btn-ghost:hover { border-color:#666; color:var(--text); }
 
   /* PROBLEM */
-  .problem { padding:120px 48px; background:var(--bg2); border-top:1px solid var(--border); }
+  .problem { padding:120px 48px; background:#050505; border-top:1px solid var(--border); }
   .problem-inner { max-width:1000px; margin:0 auto; }
   .section-label {
-    font-family:'IBM Plex Mono',monospace; font-size:0.62rem; letter-spacing:5px;
-    color:#888; margin-bottom:20px;
+    font-family:'IBM Plex Mono',monospace; font-size:0.7rem; letter-spacing:5px;
+    color:#888; margin-bottom:16px; text-transform:uppercase;
   }
   .section-title { font-size:clamp(1.8rem,3.5vw,2.8rem); font-weight:900; line-height:1.3; margin-bottom:20px; }
   .section-title em { color:var(--green); font-style:normal; }
-  .section-desc { font-size:0.95rem; color:var(--sub); line-height:1.7; font-weight:300; max-width:640px; margin-bottom:56px; }
+  .section-desc { font-size:1rem; color:#bbb; line-height:1.8; font-weight:300; max-width:640px; margin-bottom:56px; }
   .problem-grid {
     display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
     gap:1px; background:var(--border); border:1px solid var(--border);
   }
-  .problem-item { background:var(--bg2); padding:36px 32px; }
+  .problem-item { background:#0a0a0a; padding:36px 32px; border-bottom:2px solid transparent; transition:border-color 0.3s; }
+  .problem-item:hover { border-bottom-color:var(--green); }
   .problem-q { font-size:0.9rem; color:#bbb; line-height:1.7; font-style:italic; font-weight:300; padding-bottom:16px; margin-bottom:16px; border-bottom:1px solid var(--border); }
   .problem-a { font-size:0.92rem; color:var(--sub); line-height:1.8; }
   .problem-a b { color:var(--green); font-weight:700; }
 
   /* SOLUTION */
-  .solution { padding:120px 48px; border-top:1px solid var(--border); }
+  .solution { padding:120px 48px; background:#000; border-top:1px solid var(--border); }
   .solution-inner { max-width:1000px; margin:0 auto; }
   .solution-stmt {
     font-size:clamp(1.2rem,2.5vw,1.7rem); font-weight:700; line-height:1.9;
@@ -302,6 +303,10 @@
     background:var(--bg); padding:60px 56px;
     display:flex; flex-direction:column; justify-content:center;
   }
+  .module:nth-child(1) .module-visual { background:#050505; }
+  .module:nth-child(2) .module-visual { background:#030803; }
+  .module:nth-child(2) .module-info { background:#020502; }
+  .module:nth-child(3) .module-visual { background:#050505; }
   .mod-num { font-family:'IBM Plex Mono',monospace; font-size:0.58rem; letter-spacing:3px; color:#888; margin-bottom:16px; }
   .mod-tag { font-family:'IBM Plex Mono',monospace; font-size:0.65rem; letter-spacing:4px; color:var(--green); margin-bottom:16px; }
   .mod-title { font-size:clamp(1.5rem,2.5vw,2rem); font-weight:900; line-height:1.3; margin-bottom:24px; }
@@ -330,10 +335,11 @@
   .manifesto {
     padding:160px 48px; display:flex; justify-content:center;
     position:relative; overflow:hidden; border-top:1px solid var(--border);
+    background:#020d06;
   }
   .manifesto::before {
     content:''; position:absolute; inset:0;
-    background:radial-gradient(ellipse at 50% 50%,rgba(0,255,136,0.03) 0%,transparent 60%);
+    background:radial-gradient(ellipse at 50% 50%,rgba(0,255,136,0.08) 0%,transparent 60%);
     pointer-events:none;
   }
   .manifesto-inner { max-width:720px; position:relative; }
@@ -344,11 +350,15 @@
   .manifesto-item::before { content:'—'; color:var(--green); }
 
   /* ROADMAP */
-  .roadmap { padding:100px 48px; background:var(--bg2); border-top:1px solid var(--border); }
+  .roadmap { padding:100px 48px; background:#050505; border-top:1px solid var(--border); }
   .roadmap-inner { max-width:1000px; margin:0 auto; }
   .roadmap-steps { display:grid; grid-template-columns:repeat(5,1fr); gap:1px; background:var(--border); border:1px solid var(--border); margin-top:48px; }
-  .roadmap-step { background:var(--bg2); padding:28px 20px; position:relative; }
+  .roadmap-step { background:#0a0a0a; padding:28px 20px; position:relative; transition:background 0.3s; }
+  .roadmap-step:hover { background:#111; }
   .roadmap-step.on { background:#050505; }
+  .roadmap-step.current { background:#021a08; border:1px solid rgba(0,255,136,0.3); }
+  .roadmap-step.current .step-name { color:var(--green); }
+  .roadmap-step.current .step-num { color:var(--green); }
   .roadmap-step.on::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--green); }
   .step-num { font-family:'IBM Plex Mono',monospace; font-size:0.68rem; letter-spacing:2px; color:#777; margin-bottom:12px; }
   .step-name { font-size:0.95rem; font-weight:700; color:var(--text); margin-bottom:8px; }
@@ -362,14 +372,14 @@
   .roadmap-more a:hover { color:var(--green); }
 
   /* CTA */
-  .cta { padding:160px 48px; text-align:center; border-top:1px solid var(--border); position:relative; overflow:hidden; }
-  .cta::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 50% 100%,rgba(0,255,136,0.04) 0%,transparent 55%); }
+  .cta { padding:160px 48px; text-align:center; border-top:2px solid var(--green); position:relative; overflow:hidden; background:#020d06; }
+  .cta::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 50% 50%,rgba(0,255,136,0.08) 0%,transparent 60%); }
   .cta-inner { position:relative; }
-  .cta-label { font-family:'IBM Plex Mono',monospace; font-size:0.7rem; letter-spacing:5px; color:#777; margin-bottom:24px; }
-  .cta-title { font-size:clamp(2rem,4.5vw,3.2rem); font-weight:900; margin-bottom:16px; }
-  .cta-sub { color:#aaa; font-size:0.95rem; font-weight:300; margin-bottom:56px; line-height:1.8; }
+  .cta-label { font-family:'IBM Plex Mono',monospace; font-size:0.7rem; letter-spacing:5px; color:var(--green); margin-bottom:24px; }
+  .cta-title { font-size:clamp(2rem,4.5vw,3.5rem); font-weight:900; margin-bottom:16px; }
+  .cta-sub { color:#bbb; font-size:1rem; font-weight:300; margin-bottom:56px; line-height:1.8; }
   .cta-links { margin-top:48px; display:flex; gap:40px; justify-content:center; flex-wrap:wrap; }
-  .cta-links a { font-family:'IBM Plex Mono',monospace; font-size:0.75rem; letter-spacing:2px; color:#777; text-decoration:none; transition:color 0.2s; }
+  .cta-links a { font-family:'IBM Plex Mono',monospace; font-size:0.75rem; letter-spacing:2px; color:#888; text-decoration:none; transition:color 0.2s; }
   .cta-links a:hover { color:#aaa; }
 
   /* FOOTER */
@@ -412,10 +422,11 @@
   }
 
   /* 기능 이미지 섹션 */
-  .mobile-features { display:block; padding:100px 48px; background:var(--bg2); border-top:1px solid var(--border); }
+  .mobile-features { display:block; padding:100px 48px; background:#000; border-top:1px solid var(--border); }
   .mobile-features-inner { max-width:1000px; margin:0 auto; }
   .mobile-img-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:48px; }
-  .mobile-img-grid img { width:100%; border-radius:12px; }
+  .mobile-img-grid img { width:100%; border-radius:12px; transition:transform 0.3s, box-shadow 0.3s; }
+  .mobile-img-grid img:hover { transform:translateY(-4px); box-shadow:0 16px 40px rgba(0,0,0,0.6); }
 
   @keyframes up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
   .reveal { opacity:0; transform:translateY(28px); transition:opacity 0.7s,transform 0.7s; }
@@ -488,6 +499,7 @@
     </p>
     <div class="hero-actions">
       <a href="#problem" class="btn btn-green">왜 필요한가 →</a>
+      <a href="https://open.kakao.com/o/gvZXDbmi" class="btn btn-ghost" target="_blank">커뮤니티 입장하기 →</a>
     </div>
   </div>
   <div class="hero-image">
@@ -588,8 +600,8 @@
       <div class="mod-num">01 / 03</div>
       <div class="mod-tag">HUD</div>
       <div class="mod-title">현장 기억<br>외부 두뇌</div>
-      <div class="mod-problem">"아파트마다 다른 PIN을 매번 인터폰으로 확인합니다. 주차장에서 헤매다 미션을 놓쳤습니다."</div>
-      <div class="mod-solution">저장된 장소에 근접하면 <b>PIN을 자동으로 음성 안내</b>합니다. 헬멧 쓴 채로 들을 수 있습니다. <b>도착·픽업·드롭</b> 배달 사이클을 자동으로 추적합니다.</div>
+      <div class="mod-problem">"PIN 번호, 주차 구조, 위험 구간을 매번 몸으로 기억해야 합니다."</div>
+      <div class="mod-solution">근접 시 <b>자동 음성 안내</b>. 배달 사이클 <b>자동 추적</b>.</div>
       <div class="mod-features">
         <div class="mod-feature">PIN · 출입 방식 · 층수 자동 안내</div>
         <div class="mod-feature">도착 · 픽업 · 드롭 사이클 추적</div>
@@ -641,8 +653,8 @@
       <div class="mod-num">02 / 03</div>
       <div class="mod-tag">MANAGER</div>
       <div class="mod-title">감이 아니라<br>숫자로</div>
-      <div class="mod-problem">"오늘 10시간 일해서 15만원 벌었는데 실질 시급이 얼마인지 모릅니다. 배달 가계부는 3일을 못 넘겼습니다."</div>
-      <div class="mod-solution">수입만 입력하면 <b>실질 시급, 공차율, 플랫폼별 수익</b>을 자동 계산합니다. 만신창이 몸으로도 <b>3초면 정산</b> 완료입니다.</div>
+      <div class="mod-problem">"오늘 실질 시급이 얼마인지 퇴근 후에도 모릅니다."</div>
+      <div class="mod-solution">수입 입력 하나로 <b>실시급·공차율·플랫폼 비교</b> 자동 완성.</div>
       <div class="mod-features">
         <div class="mod-feature">실질 시급 · 공차율 자동 계산</div>
         <div class="mod-feature">플랫폼별 수익 비교</div>
@@ -692,8 +704,8 @@
       <div class="mod-num">03 / 03</div>
       <div class="mod-tag">HEATMAP</div>
       <div class="mod-title">밤마다 지도를<br>연구하지 않아도</div>
-      <div class="mod-problem">"1년 동안 밤마다 지도를 펼쳐놓고 연구했습니다. 그래도 다음날 현장에서 맞는지 틀리는지 몰랐습니다."</div>
-      <div class="mod-solution">내 과거 운행 데이터가 <b>어디로 가야 하는지</b> 지도로 보여줍니다. 유튜버의 꿀팁이 아닌 <b>내 데이터가 나의 전략</b>입니다.</div>
+      <div class="mod-problem">"어디로 가야 할지 매일 감으로 결정합니다."</div>
+      <div class="mod-solution">내 운행 데이터가 <b>Hot Zone·시간대 전략</b>을 알려줍니다.</div>
       <div class="mod-features">
         <div class="mod-feature">픽업 · 드롭 밀집 구역 시각화</div>
         <div class="mod-feature">요일 · 시간대별 전략 필터</div>
@@ -712,12 +724,12 @@
     <div class="manifesto-label reveal">DATA SOVEREIGNTY</div>
     <blockquote class="manifesto-quote reveal">"개발자조차<br>당신의 데이터에<br>접근하지 못합니다."</blockquote>
     <div class="manifesto-list reveal">
-      <div class="manifesto-item">클라우드 강제 업로드 없음</div>
-      <div class="manifesto-item">중앙 서버 없음</div>
-      <div class="manifesto-item">사용자 추적 없음</div>
-      <div class="manifesto-item">데이터 판매 없음</div>
-      <div class="manifesto-item">AES-256 로컬 암호화</div>
-      <div class="manifesto-item">오프라인 완전 작동</div>
+      <div class="manifesto-item">☁️ 클라우드 강제 업로드 없음</div>
+      <div class="manifesto-item">🖥️ 중앙 서버 없음</div>
+      <div class="manifesto-item">👁️ 사용자 추적 없음</div>
+      <div class="manifesto-item">💰 데이터 판매 없음</div>
+      <div class="manifesto-item">🔒 AES-256 로컬 암호화</div>
+      <div class="manifesto-item">📡 오프라인 완전 작동</div>
     </div>
   </div>
 </section>
@@ -730,7 +742,7 @@
     <div class="roadmap-steps reveal">
       <div class="roadmap-step on"><div class="step-num">1단계</div><div class="step-name">기억 HUD</div><div class="step-desc">GPS 핀 메모 · 음성 안내</div><span class="step-badge badge-on">운영 중</span></div>
       <div class="roadmap-step on"><div class="step-num">1.5단계</div><div class="step-name">안전 보조</div><div class="step-desc">후면 단속 · 과속 카메라</div><span class="step-badge badge-on">운영 중</span></div>
-      <div class="roadmap-step on"><div class="step-num">2단계</div><div class="step-name">Rider Manager</div><div class="step-desc">정산 · 시급 · 플랫폼 비교</div><span class="step-badge badge-on">운영 중</span></div>
+      <div class="roadmap-step on current"><div class="step-num">2단계 · 현재</div><div class="step-name">Rider Manager</div><div class="step-desc">정산 · 시급 · 플랫폼 비교</div><span class="step-badge badge-on">▶ 운영 중</span></div>
       <div class="roadmap-step"><div class="step-num">3단계</div><div class="step-name">Heat Map</div><div class="step-desc">전략 지도 · 시간대 분석</div><span class="step-badge badge-dev">개발 중</span></div>
       <div class="roadmap-step"><div class="step-num">4단계</div><div class="step-name">완전 자동화</div><div class="step-desc">콜 감지 · 자동 기록</div><span class="step-badge badge-next">예정</span></div>
     </div>
@@ -764,6 +776,11 @@
     <a href="roadmap.html">Roadmap</a>
     <a href="install.html">설치</a>
   </nav>
+  <div class="foot-legal" style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;">
+    <a href="terms.html" style="font-family:'IBM Plex Mono',monospace;font-size:0.62rem;color:#555;text-decoration:none;">이용약관</a>
+    <a href="privacy.html" style="font-family:'IBM Plex Mono',monospace;font-size:0.62rem;color:#555;text-decoration:none;">개인정보처리방침</a>
+    <a href="mailto:smart.tool.kr@gmail.com" style="font-family:'IBM Plex Mono',monospace;font-size:0.62rem;color:#555;text-decoration:none;">문의하기</a>
+  </div>
   <div class="foot-copy">© 2026 Smart Tool Korea · riderhud.kr</div>
 </footer>
 

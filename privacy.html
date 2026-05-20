@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>개인정보처리방침 — Rider HUD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;700&family=Noto+Sans+KR:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root { --green:#00ff88; --bg:#000; --text:#fff; --sub:#aaa; --dim:#777; --border:#111; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'Noto Sans KR',sans-serif; }
+  nav { position:sticky; top:0; z-index:100; padding:0 48px; height:64px; display:flex; justify-content:space-between; align-items:center; background:#000; border-bottom:2px solid var(--green); }
+  .nav-logo { font-family:'IBM Plex Mono',monospace; font-size:1.1rem; font-weight:700; letter-spacing:4px; color:var(--green); text-decoration:none; }
+  .nav-logo span { color:#aaa; font-weight:300; }
+  .content { max-width:800px; margin:0 auto; padding:80px 48px; }
+  h1 { font-size:2rem; font-weight:900; margin-bottom:8px; }
+  .date { font-family:'IBM Plex Mono',monospace; font-size:0.75rem; color:var(--dim); margin-bottom:48px; }
+  h2 { font-size:1.1rem; font-weight:700; margin:40px 0 16px; color:var(--green); }
+  p { font-size:0.92rem; color:var(--sub); line-height:1.9; font-weight:300; margin-bottom:16px; }
+  ul { margin:12px 0 16px 24px; }
+  li { font-size:0.9rem; color:var(--sub); line-height:1.8; font-weight:300; margin-bottom:6px; }
+  .highlight { background:#050505; border-left:2px solid var(--green); padding:20px 24px; margin:24px 0; }
+  .highlight p { margin:0; color:#ccc; font-weight:400; }
+  footer { padding:36px 48px; border-top:1px solid var(--border); text-align:center; font-family:'IBM Plex Mono',monospace; font-size:0.65rem; color:#444; }
+  @media(max-width:768px){ nav{padding:0 20px;} .content{padding:60px 20px;} footer{padding:28px 20px;} }
+</style>
+</head>
+<body>
+<nav>
+  <a class="nav-logo" href="index.html">HUD<span> for Riders</span></a>
+</nav>
+<div class="content">
+  <h1>개인정보처리방침</h1>
+  <div class="date">시행일: 2026년 5월 20일 · Smart Tool Korea</div>
+  <div class="highlight"><p>🔒 Rider HUD의 모든 데이터는 사용자 기기에만 저장됩니다. 회사 서버로 전송되지 않으며, 개발자를 포함한 누구도 사용자의 데이터에 접근할 수 없습니다.</p></div>
+  <h2>제1조 개인정보 수집 항목</h2>
+  <p>Rider HUD는 원칙적으로 개인정보를 수집하지 않습니다. 서비스 이용 중 이용자가 직접 입력하는 정보는 기기 내에만 저장됩니다.</p>
+  <ul>
+    <li>GPS 위치 정보 (핀 메모 저장 시)</li>
+    <li>운행 관련 메모 (장소명, 비밀번호 등)</li>
+    <li>수익 및 운행 통계 데이터</li>
+    <li>긴급 연락처 정보</li>
+  </ul>
+  <h2>제2조 개인정보 수집 및 이용 목적</h2>
+  <p>수집된 정보는 서비스 기능 제공 목적으로만 사용되며, 이용자의 기기를 벗어나지 않습니다.</p>
+  <h2>제3조 개인정보의 보유 및 이용 기간</h2>
+  <p>모든 데이터는 이용자의 기기 로컬 저장소에 보관됩니다. 이용자가 직접 삭제하거나 앱을 삭제하면 데이터도 함께 삭제됩니다. 드롭 스탬프 데이터는 생성 후 48시간이 지나면 자동 삭제됩니다.</p>
+  <h2>제4조 개인정보의 제3자 제공</h2>
+  <p>회사는 이용자의 개인정보를 제3자에게 제공하지 않습니다. 서비스 내 모든 데이터는 이용자 기기 내에서만 처리됩니다.</p>
+  <h2>제5조 위치정보 처리</h2>
+  <p>본 서비스는 GPS 기반 위치 정보를 사용합니다. 위치 정보는 이용자 기기 내에만 저장되며 외부로 전송되지 않습니다.</p>
+  <h2>제6조 보안</h2>
+  <p>이용자의 데이터는 AES-256 암호화 방식으로 백업 파일이 생성됩니다.</p>
+  <h2>제7조 이용자 권리</h2>
+  <ul>
+    <li>이용자는 언제든지 앱 내 설정에서 데이터를 삭제할 수 있습니다.</li>
+    <li>이용자는 백업 파일을 통해 데이터를 내보내고 복원할 수 있습니다.</li>
+  </ul>
+  <h2>제8조 문의</h2>
+  <p>개인정보 관련 문의: <a href="mailto:smart.tool.kr@gmail.com" style="color:var(--green);">smart.tool.kr@gmail.com</a></p>
+</div>
+<footer>© 2026 Smart Tool Korea · riderhud.kr</footer>
+</body>
+</html>
