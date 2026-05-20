@@ -28,11 +28,11 @@
 
   /* NAV */
   nav {
-    position:fixed; top:0; left:0; right:0; z-index:100;
-    padding:18px 48px;
+    position:sticky; top:0; left:0; right:0; z-index:100;
+    padding:0 48px; height:64px;
     display:flex; justify-content:space-between; align-items:center;
-    background:rgba(0,0,0,0.95); backdrop-filter:blur(20px);
-    border-bottom:1px solid var(--border);
+    background:#000;
+    border-bottom:2px solid var(--green);
   }
   .nav-logo img { height:32px; }
   .nav-menu { display:flex; gap:36px; list-style:none; align-items:center; }
@@ -276,7 +276,7 @@
     <li><a href="index.html#modules" class="active">기능</a></li>
     <li><a href="roadmap.html">로드맵</a></li>
     <li><a href="install.html">설치</a></li>
-    <li><a href="https://riderhud.kr" class="nav-cta">앱 열기</a></li>
+    <li><a href="install.html" class="nav-cta">앱 열기</a></li>
   </ul>
   <div class="nav-hamburger" onclick="toggleMenu()">
     <span></span><span></span><span></span>
@@ -289,7 +289,7 @@
   <a href="index.html#modules">기능</a>
   <a href="roadmap.html">로드맵</a>
   <a href="install.html">설치</a>
-  <a href="https://riderhud.kr" class="nav-cta">앱 열기</a>
+  <a href="install.html" class="nav-cta">앱 열기</a>
 </div>
 
 <!-- HERO -->
@@ -529,7 +529,7 @@
     완성되는 순간 바로 전략 지도를 볼 수 있습니다.
   </p>
   <div class="reveal">
-    <a href="https://riderhud.kr" class="btn btn-green">앱 열기 →</a>
+    <a href="install.html" class="btn btn-green">앱 열기 →</a>
     <a href="index.html" class="btn btn-ghost">홈으로</a>
   </div>
 </section>

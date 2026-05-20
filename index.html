@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rider HUD — 라이더 개인 운영체제</title>
 <meta name="description" content="라이더의 경험을 데이터로 기록하고 스스로 분석·활용할 수 있게 만드는 개인용 라이더 운영체제">
+<meta property="og:title" content="Rider HUD — 라이더 개인 운영체제">
+<meta property="og:description" content="내가 흘린 땀의 가치, 플랫폼이 아닌 내가 소유합니다. 개인용 라이더 운영체제.">
+<meta property="og:image" content="https://riderhud.com/hero.jpg">
+<meta property="og:url" content="https://riderhud.com">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;700&family=Noto+Sans+KR:wght@300;400;700;900&display=swap" rel="stylesheet">
 <style>
@@ -80,17 +86,17 @@
     object-fit:cover;
   }
   .hero-eyebrow {
-    font-family:'IBM Plex Mono',monospace; font-size:0.65rem; letter-spacing:5px;
+    font-family:'IBM Plex Mono',monospace; font-size:0.75rem; letter-spacing:5px;
     color:var(--green); margin-bottom:28px;
     opacity:0; animation:up 0.7s 0.2s forwards;
   }
   .hero-h1 {
-    font-size:clamp(2.2rem,5vw,3.8rem); font-weight:900; line-height:1.2;
+    font-size:clamp(2.2rem,5vw,3.8rem); font-weight:900; line-height:1.3;
     margin-bottom:28px; opacity:0; animation:up 0.7s 0.35s forwards;
   }
   .hero-h1 em { color:var(--green); font-style:normal; }
   .hero-desc {
-    font-size:1rem; color:var(--sub); line-height:1.9; font-weight:300;
+    font-size:1rem; color:var(--sub); line-height:1.7; font-weight:300;
     max-width:520px; margin-bottom:52px;
     opacity:0; animation:up 0.7s 0.5s forwards;
   }
@@ -105,7 +111,7 @@
   }
   .btn-green { background:var(--green); color:#000; font-weight:700; }
   .btn-green:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(0,255,136,0.25); }
-  .btn-ghost { border:1px solid #333; color:var(--dim); }
+  .btn-ghost { border:1px solid #333; color:#777; }
   .btn-ghost:hover { border-color:#666; color:var(--text); }
 
   /* PROBLEM */
@@ -117,22 +123,22 @@
   }
   .section-title { font-size:clamp(1.8rem,3.5vw,2.8rem); font-weight:900; line-height:1.3; margin-bottom:20px; }
   .section-title em { color:var(--green); font-style:normal; }
-  .section-desc { font-size:0.95rem; color:var(--sub); line-height:1.9; font-weight:300; max-width:640px; margin-bottom:56px; }
+  .section-desc { font-size:0.95rem; color:var(--sub); line-height:1.7; font-weight:300; max-width:640px; margin-bottom:56px; }
   .problem-grid {
     display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
     gap:1px; background:var(--border); border:1px solid var(--border);
   }
   .problem-item { background:var(--bg2); padding:36px 32px; }
-  .problem-q { font-size:0.85rem; color:#aaa; line-height:1.7; font-style:italic; font-weight:300; padding-bottom:16px; margin-bottom:16px; border-bottom:1px solid var(--border); }
-  .problem-a { font-size:0.88rem; color:var(--sub); line-height:1.8; }
+  .problem-q { font-size:0.9rem; color:#bbb; line-height:1.7; font-style:italic; font-weight:300; padding-bottom:16px; margin-bottom:16px; border-bottom:1px solid var(--border); }
+  .problem-a { font-size:0.92rem; color:var(--sub); line-height:1.8; }
   .problem-a b { color:var(--green); font-weight:700; }
 
   /* SOLUTION */
   .solution { padding:120px 48px; border-top:1px solid var(--border); }
   .solution-inner { max-width:1000px; margin:0 auto; }
   .solution-stmt {
-    font-size:clamp(1.2rem,2.5vw,1.7rem); font-weight:700; line-height:1.8;
-    color:var(--sub); border-left:3px solid var(--green);
+    font-size:clamp(1.2rem,2.5vw,1.7rem); font-weight:700; line-height:1.9;
+    color:#ccc; border-left:3px solid var(--green);
     padding-left:32px; margin-bottom:0; max-width:700px;
   }
   .solution-stmt b { color:var(--text); }
@@ -170,7 +176,7 @@
   }
   .hm-header { text-align:center; margin-bottom:20px; }
   .hm-title { font-family:'IBM Plex Mono',monospace; color:var(--green); font-size:1.1rem; letter-spacing:4px; font-weight:700; }
-  .hm-date { font-size:0.65rem; color:var(--off); margin-top:4px; }
+  .hm-date { font-size:0.65rem; color:#666; margin-top:4px; }
   .hm-alert {
     background:#0a1f0a; border:1px solid rgba(0,255,136,0.3);
     border-radius:10px; padding:16px 20px; margin-bottom:16px;
@@ -182,7 +188,7 @@
   }
   .hm-alert-label { font-size:0.6rem; letter-spacing:3px; color:var(--green); margin-bottom:8px; font-family:'IBM Plex Mono',monospace; }
   .hm-alert-text { font-size:1rem; font-weight:700; color:#fff; line-height:1.5; }
-  .hm-alert-sub { font-size:0.7rem; color:var(--dim); margin-top:4px; }
+  .hm-alert-sub { font-size:0.7rem; color:#777; margin-top:4px; }
   .hm-cycle {
     display:grid; grid-template-columns:repeat(3,1fr);
     gap:8px; margin-bottom:16px;
@@ -198,7 +204,7 @@
   .hm-floor-btn {
     flex:1; padding:8px; border-radius:6px; text-align:center;
     font-size:0.7rem; font-weight:700; background:#1a1a1a;
-    border:1px solid #222; color:var(--dim);
+    border:1px solid #222; color:#777;
     font-family:'IBM Plex Mono',monospace;
   }
   .hm-floor-btn.active { background:#0d2a0d; border-color:var(--green); color:var(--green); }
@@ -218,13 +224,13 @@
   }
   .mgr-main-label { font-size:0.65rem; letter-spacing:3px; color:var(--green); margin-bottom:8px; font-family:'IBM Plex Mono',monospace; }
   .mgr-main-value { font-size:2.8rem; font-weight:900; color:var(--green); font-family:'IBM Plex Mono',monospace; letter-spacing:-1px; }
-  .mgr-main-unit { font-size:1rem; color:var(--dim); }
+  .mgr-main-unit { font-size:1rem; color:#777; }
   .mgr-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:16px; }
   .mgr-cell {
     background:#111; border-radius:8px; padding:14px;
     border:1px solid #1a1a1a;
   }
-  .mgr-cell-label { font-size:0.58rem; color:var(--off); margin-bottom:6px; letter-spacing:1px; }
+  .mgr-cell-label { font-size:0.58rem; color:#666; margin-bottom:6px; letter-spacing:1px; }
   .mgr-cell-value { font-size:1rem; font-weight:700; color:var(--sub); font-family:'IBM Plex Mono',monospace; }
   .mgr-cell-value.green { color:var(--green); }
   .mgr-cell-value.orange { color:#ffaa00; }
@@ -232,7 +238,7 @@
   .mgr-platform {
     flex:1; padding:8px 4px; border-radius:6px; text-align:center;
     font-size:0.62rem; font-weight:700; border:1px solid #1a1a1a;
-    background:#111; color:var(--off);
+    background:#111; color:#666;
   }
   .mgr-platform.active { background:#0a1f0a; border-color:var(--green); color:var(--green); }
 
@@ -249,7 +255,7 @@
   .hmp-day {
     width:28px; height:28px; border-radius:6px; display:flex;
     align-items:center; justify-content:center;
-    font-size:0.65rem; font-weight:700; background:#1a1a1a; color:var(--off);
+    font-size:0.65rem; font-weight:700; background:#1a1a1a; color:#666;
   }
   .hmp-day.active { background:#0a1f0a; border:1px solid var(--green); color:var(--green); }
   .hmp-map {
@@ -279,7 +285,7 @@
   }
   .hmp-you { top:45%; left:48%; }
   .hmp-legend { padding:12px 16px; display:flex; gap:12px; align-items:center; border-top:1px solid #1a1a1a; }
-  .hmp-legend-item { display:flex; align-items:center; gap:6px; font-size:0.6rem; color:var(--dim); font-family:'IBM Plex Mono',monospace; }
+  .hmp-legend-item { display:flex; align-items:center; gap:6px; font-size:0.6rem; color:#777; font-family:'IBM Plex Mono',monospace; }
   .hmp-dot-hot { width:8px; height:8px; border-radius:50%; background:#ff3c3c; }
   .hmp-dot-cold { width:8px; height:8px; border-radius:50%; background:#3c6aff; }
   .hmp-dot-me { width:8px; height:8px; border-radius:50%; background:var(--green); box-shadow:0 0 6px var(--green); }
@@ -287,7 +293,7 @@
   .hmp-time {
     flex:1; padding:6px 4px; border-radius:6px; text-align:center;
     font-size:0.58rem; font-family:'IBM Plex Mono',monospace;
-    background:#1a1a1a; color:var(--off); border:1px solid transparent;
+    background:#1a1a1a; color:#666; border:1px solid transparent;
   }
   .hmp-time.active { background:#0a1f0a; border-color:var(--green); color:var(--green); }
 
@@ -300,22 +306,22 @@
   .mod-tag { font-family:'IBM Plex Mono',monospace; font-size:0.65rem; letter-spacing:4px; color:var(--green); margin-bottom:16px; }
   .mod-title { font-size:clamp(1.5rem,2.5vw,2rem); font-weight:900; line-height:1.3; margin-bottom:24px; }
   .mod-problem {
-    font-size:0.85rem; color:var(--dim); line-height:1.8;
+    font-size:0.9rem; color:#999; line-height:1.8;
     font-style:italic; font-weight:300;
     padding:16px 20px; background:var(--bg2);
     border-left:2px solid #333; margin-bottom:20px;
   }
-  .mod-solution { font-size:0.92rem; color:var(--sub); line-height:1.8; font-weight:300; margin-bottom:32px; }
+  .mod-solution { font-size:1rem; color:var(--sub); line-height:1.8; font-weight:300; margin-bottom:32px; }
   .mod-solution b { color:var(--text); font-weight:700; }
-  .mod-features { display:flex; flex-direction:column; gap:8px; margin-bottom:36px; }
+  .mod-features { display:flex; flex-direction:column; gap:10px; margin-bottom:36px; }
   .mod-feature {
     display:flex; align-items:center; gap:10px;
-    font-size:0.8rem; color:#aaa;
+    font-size:0.88rem; color:#bbb; line-height:1.6;
   }
   .mod-feature::before { content:'→'; color:var(--green); font-family:'IBM Plex Mono',monospace; font-size:0.7rem; }
   .mod-link {
-    font-family:'IBM Plex Mono',monospace; font-size:0.7rem; letter-spacing:2px;
-    color:var(--off); text-decoration:none; transition:color 0.2s;
+    font-family:'IBM Plex Mono',monospace; font-size:0.75rem; letter-spacing:2px;
+    color:#777; text-decoration:none; transition:color 0.2s;
     display:inline-flex; align-items:center; gap:8px;
   }
   .mod-link:hover { color:var(--green); }
@@ -331,10 +337,10 @@
     pointer-events:none;
   }
   .manifesto-inner { max-width:720px; position:relative; }
-  .manifesto-label { font-family:'IBM Plex Mono',monospace; font-size:0.6rem; letter-spacing:5px; color:var(--off); margin-bottom:56px; text-align:center; }
-  .manifesto-quote { font-size:clamp(1.5rem,3vw,2.2rem); font-weight:900; line-height:1.6; border-left:2px solid var(--green); padding-left:40px; margin-bottom:48px; }
-  .manifesto-list { padding-left:42px; display:grid; grid-template-columns:1fr 1fr; gap:14px 32px; }
-  .manifesto-item { font-family:'IBM Plex Mono',monospace; font-size:0.68rem; letter-spacing:1px; color:#aaa; display:flex; align-items:center; gap:10px; }
+  .manifesto-label { font-family:'IBM Plex Mono',monospace; font-size:0.7rem; letter-spacing:5px; color:#777; margin-bottom:56px; text-align:center; }
+  .manifesto-quote { font-size:clamp(1.5rem,3vw,2.2rem); font-weight:900; line-height:1.7; border-left:2px solid var(--green); padding-left:40px; margin-bottom:48px; }
+  .manifesto-list { padding-left:42px; display:grid; grid-template-columns:1fr 1fr; gap:16px 32px; }
+  .manifesto-item { font-family:'IBM Plex Mono',monospace; font-size:0.82rem; letter-spacing:1px; color:#bbb; display:flex; align-items:center; gap:10px; }
   .manifesto-item::before { content:'—'; color:var(--green); }
 
   /* ROADMAP */
@@ -344,35 +350,35 @@
   .roadmap-step { background:var(--bg2); padding:28px 20px; position:relative; }
   .roadmap-step.on { background:#050505; }
   .roadmap-step.on::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--green); }
-  .step-num { font-family:'IBM Plex Mono',monospace; font-size:0.55rem; letter-spacing:2px; color:var(--off); margin-bottom:12px; }
-  .step-name { font-size:0.9rem; font-weight:700; color:var(--text); margin-bottom:8px; }
-  .step-desc { font-size:0.72rem; color:#aaa; line-height:1.6; font-weight:300; }
-  .step-badge { font-family:'IBM Plex Mono',monospace; font-size:0.55rem; letter-spacing:1px; margin-top:16px; display:inline-block; padding:3px 8px; }
+  .step-num { font-family:'IBM Plex Mono',monospace; font-size:0.68rem; letter-spacing:2px; color:#777; margin-bottom:12px; }
+  .step-name { font-size:0.95rem; font-weight:700; color:var(--text); margin-bottom:8px; }
+  .step-desc { font-size:0.82rem; color:#aaa; line-height:1.6; font-weight:300; }
+  .step-badge { font-family:'IBM Plex Mono',monospace; font-size:0.62rem; letter-spacing:1px; margin-top:16px; display:inline-block; padding:4px 10px; }
   .badge-on { color:var(--green); border:1px solid rgba(0,255,136,0.25); }
-  .badge-dev { color:#777; border:1px solid #222; }
-  .badge-next { color:var(--off); border:1px solid #1a1a1a; }
+  .badge-dev { color:#999; border:1px solid #333; }
+  .badge-next { color:#777; border:1px solid #222; }
   .roadmap-more { margin-top:28px; text-align:right; }
-  .roadmap-more a { font-family:'IBM Plex Mono',monospace; font-size:0.65rem; letter-spacing:2px; color:var(--dim); text-decoration:none; transition:color 0.2s; }
+  .roadmap-more a { font-family:'IBM Plex Mono',monospace; font-size:0.75rem; letter-spacing:2px; color:#777; text-decoration:none; transition:color 0.2s; }
   .roadmap-more a:hover { color:var(--green); }
 
   /* CTA */
   .cta { padding:160px 48px; text-align:center; border-top:1px solid var(--border); position:relative; overflow:hidden; }
   .cta::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 50% 100%,rgba(0,255,136,0.04) 0%,transparent 55%); }
   .cta-inner { position:relative; }
-  .cta-label { font-family:'IBM Plex Mono',monospace; font-size:0.6rem; letter-spacing:5px; color:var(--off); margin-bottom:24px; }
+  .cta-label { font-family:'IBM Plex Mono',monospace; font-size:0.7rem; letter-spacing:5px; color:#777; margin-bottom:24px; }
   .cta-title { font-size:clamp(2rem,4.5vw,3.2rem); font-weight:900; margin-bottom:16px; }
-  .cta-sub { color:var(--dim); font-size:0.9rem; font-weight:300; margin-bottom:56px; line-height:1.8; }
+  .cta-sub { color:#aaa; font-size:0.95rem; font-weight:300; margin-bottom:56px; line-height:1.8; }
   .cta-links { margin-top:48px; display:flex; gap:40px; justify-content:center; flex-wrap:wrap; }
-  .cta-links a { font-family:'IBM Plex Mono',monospace; font-size:0.65rem; letter-spacing:2px; color:var(--off); text-decoration:none; transition:color 0.2s; }
-  .cta-links a:hover { color:var(--dim); }
+  .cta-links a { font-family:'IBM Plex Mono',monospace; font-size:0.75rem; letter-spacing:2px; color:#777; text-decoration:none; transition:color 0.2s; }
+  .cta-links a:hover { color:#aaa; }
 
   /* FOOTER */
   footer { padding:36px 48px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; }
-  .foot-logo { font-family:'IBM Plex Mono',monospace; font-size:0.75rem; letter-spacing:4px; color:var(--off); }
+  .foot-logo { font-family:'IBM Plex Mono',monospace; font-size:0.75rem; letter-spacing:4px; color:#777; }
   .foot-nav { display:flex; gap:28px; }
-  .foot-nav a { font-family:'IBM Plex Mono',monospace; font-size:0.6rem; letter-spacing:1px; color:#222; text-decoration:none; transition:color 0.2s; }
-  .foot-nav a:hover { color:var(--dim); }
-  .foot-copy { font-family:'IBM Plex Mono',monospace; font-size:0.6rem; color:#222; }
+  .foot-nav a { font-family:'IBM Plex Mono',monospace; font-size:0.68rem; letter-spacing:1px; color:#555; text-decoration:none; transition:color 0.2s; }
+  .foot-nav a:hover { color:#aaa; }
+  .foot-copy { font-family:'IBM Plex Mono',monospace; font-size:0.65rem; color:#444; }
 
   /* 햄버거 메뉴 */
   .nav-hamburger {
@@ -413,19 +419,26 @@
     nav{padding:0 20px;}
     .nav-menu{display:none;}
     .nav-hamburger{display:flex;}
-    .hero{grid-template-columns:1fr; padding:40px 20px; gap:32px;}
+    .hero{grid-template-columns:1fr; padding:60px 20px 40px; gap:24px;}
+    .hero-h1{font-size:clamp(1.8rem,7vw,2.8rem);}
     .hero-image{display:flex;}
     .hero-image img{width:100%; border-radius:8px;}
-    .problem{padding:80px 20px;}
-    .solution{padding:80px 20px;}
+    .btn{padding:18px 48px; font-size:0.85rem;}
+    .problem{padding:60px 20px;}
+    .problem-item{padding:24px 20px;}
+    .section-title{font-size:clamp(1.4rem,5vw,2rem);}
+    .solution{padding:60px 20px;}
     .module{grid-template-columns:1fr;}
     .module.reverse{direction:ltr;}
-    .module-info{padding:40px 28px;}
-    .manifesto{padding:100px 20px;} .manifesto-list{grid-template-columns:1fr;}
-    .roadmap{padding:80px 20px;}
-    .roadmap-steps{grid-template-columns:repeat(2,1fr);}
-    .cta{padding:100px 20px;}
-    footer{padding:28px 20px;flex-direction:column;align-items:flex-start;}
+    .module-info{padding:32px 24px;}
+    .module-visual{padding:40px 24px;}
+    .manifesto{padding:60px 20px;} .manifesto-list{grid-template-columns:1fr;}
+    .roadmap{padding:60px 20px;}
+    .roadmap-steps{grid-template-columns:1fr;}
+    .cta{padding:60px 20px;}
+    .cta-title{font-size:clamp(1.6rem,6vw,2.4rem);}
+    footer{padding:28px 20px;flex-direction:column;align-items:flex-start;gap:20px;}
+    .foot-nav{flex-wrap:wrap;gap:16px;}
   }
 </style>
 </head>
@@ -438,7 +451,7 @@
     <li><a href="#modules">기능</a></li>
     <li><a href="roadmap.html">로드맵</a></li>
     <li><a href="install.html">설치</a></li>
-    <li><a href="https://riderhud.kr" class="nav-cta">앱 열기</a></li>
+    <li><a href="install.html" class="nav-cta">앱 열기</a></li>
   </ul>
   <div class="nav-hamburger" onclick="toggleMenu()">
     <span></span><span></span><span></span>
@@ -451,7 +464,7 @@
   <a href="index.html#modules">기능</a>
   <a href="roadmap.html">로드맵</a>
   <a href="install.html">설치</a>
-  <a href="https://riderhud.kr" class="nav-cta">앱 열기</a>
+  <a href="install.html" class="nav-cta">앱 열기</a>
 </div>
 
 <!-- HERO -->
@@ -710,10 +723,10 @@
     <div class="cta-label reveal">FREE · PWA · NO APP STORE</div>
     <h2 class="cta-title reveal">지금 바로 시작하세요</h2>
     <p class="cta-sub reveal">앱스토어 설치 불필요. 브라우저에서 바로 실행됩니다.<br>기본 기능은 영구 무료입니다.</p>
-    <div class="reveal"><a href="https://riderhud.kr" class="btn btn-green" style="font-size:0.9rem;padding:20px 64px;">앱 열기 →</a></div>
+    <div class="reveal"><a href="install.html" class="btn btn-green" style="font-size:0.9rem;padding:20px 64px;">앱 열기 →</a></div>
     <div class="cta-links reveal">
       <a href="install.html">설치 가이드 →</a>
-      <a href="https://open.kakao.com">카카오 커뮤니티 →</a>
+      <a href="https://open.kakao.com/o/gvZXDbmi">Rider HUD 커뮤니티 →</a>
       <a href="roadmap.html">로드맵 →</a>
     </div>
   </div>
