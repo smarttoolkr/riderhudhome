@@ -224,6 +224,9 @@
     padding:12px 24px; font-weight:700!important; text-align:center;
     border:none;
   }
+  .mobile-safety-img { display:none; width:100%; padding:0 20px; margin-top:24px; }
+  .mobile-safety-img img { width:100%; border-radius:12px; }
+
   @keyframes up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
   .reveal { opacity:0; transform:translateY(28px); transition:opacity 0.7s,transform 0.7s; }
   .reveal.on { opacity:1; transform:translateY(0); }
@@ -231,6 +234,7 @@
   @media(max-width:900px){
     nav{padding:0 20px;} .nav-menu{display:none;} .nav-hamburger{display:flex;}
     .hero{padding:120px 20px 60px;}
+    .mobile-safety-img{display:block;}
     .hero-layout{grid-template-columns:1fr; gap:40px;}
     .hero-mockup{display:none;}
     .section{padding:60px 20px;}
@@ -304,6 +308,11 @@
     </div>
   </div>
 </section>
+
+<!-- 모바일 안전 이미지 -->
+<div class="mobile-safety-img">
+  <img src="safety-img.png" alt="과속 단속 카메라 후면 단속까지">
+</div>
 
 <!-- 문제 제기 -->
 <section class="section dark">

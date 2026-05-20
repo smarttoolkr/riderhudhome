@@ -411,6 +411,12 @@
     border:none;
   }
 
+  /* 모바일 전용 기능 이미지 */
+  .mobile-features { display:none; padding:60px 20px; background:var(--bg2); border-top:1px solid var(--border); }
+  .mobile-features-inner { max-width:500px; margin:0 auto; }
+  .mobile-img-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:32px; }
+  .mobile-img-grid img { width:100%; border-radius:12px; }
+
   @keyframes up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
   .reveal { opacity:0; transform:translateY(28px); transition:opacity 0.7s,transform 0.7s; }
   .reveal.on { opacity:1; transform:translateY(0); }
@@ -435,6 +441,7 @@
     .manifesto{padding:60px 20px;} .manifesto-list{grid-template-columns:1fr;}
     .roadmap{padding:60px 20px;}
     .roadmap-steps{grid-template-columns:1fr;}
+    .mobile-features{display:block;}
     .cta{padding:60px 20px;}
     .cta-title{font-size:clamp(1.6rem,6vw,2.4rem);}
     footer{padding:28px 20px;flex-direction:column;align-items:flex-start;gap:20px;}
@@ -684,6 +691,18 @@
   </div>
 
 </div>
+
+<!-- 모바일 전용 기능 이미지 -->
+<section class="mobile-features">
+  <div class="mobile-features-inner">
+    <div class="section-label reveal">FEATURES IN ACTION</div>
+    <h2 class="section-title reveal">실제로 <em>이렇게 작동합니다</em></h2>
+    <div class="mobile-img-grid reveal">
+      <img src="feature1.png" alt="라이더 필수 기능 4가지">
+      <img src="feature2.png" alt="배달하다 와 미쳤다 소리 나오는 순간">
+    </div>
+  </div>
+</section>
 
 <!-- MANIFESTO -->
 <section class="manifesto">

@@ -274,6 +274,9 @@
     padding:12px 24px; font-weight:700!important; text-align:center;
     border:none;
   }
+  /* 모바일 전용 이미지 */
+  .mobile-feature-img { display:none; width:100%; border-radius:12px; margin-top:24px; }
+
   @keyframes up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
   .reveal { opacity:0; transform:translateY(28px); transition:opacity 0.7s,transform 0.7s; }
   .reveal.on { opacity:1; transform:translateY(0); }
@@ -281,6 +284,8 @@
   @media(max-width:900px){
     nav{padding:0 20px;} .nav-menu{display:none;} .nav-hamburger{display:flex;}
     .hero{padding:120px 20px 60px;}
+    .mobile-feature-img{display:block;}
+    .mobile-feature-img-wrap{display:block!important;}
     .hero-layout{grid-template-columns:1fr; gap:40px;}
     .hero-mockup{display:none;}
     .section{padding:60px 20px;}
@@ -363,6 +368,11 @@
     </div>
   </div>
 </section>
+
+<!-- 모바일 PIN 이미지 -->
+<div style="display:none;" class="mobile-feature-img-wrap">
+  <img src="pin.png" alt="GPS 핀 메모 TTS 안내" class="mobile-feature-img" style="padding:0 20px;">
+</div>
 
 <!-- 문제 제기 -->
 <section class="section dark">
@@ -513,6 +523,14 @@
     </div>
   </div>
 </section>
+
+<!-- 모바일 스탬프/주차 이미지 -->
+<div style="display:none;" class="mobile-feature-img-wrap">
+  <div style="padding:0 20px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+    <img src="stamp.png" alt="타임스탬프 증빙" style="width:100%;border-radius:12px;">
+    <img src="parking.png" alt="미로 주차장" style="width:100%;border-radius:12px;">
+  </div>
+</div>
 
 <!-- CTA -->
 <section class="cta">
