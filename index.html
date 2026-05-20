@@ -44,13 +44,15 @@
     text-decoration:none;
   }
   .nav-logo span { color:#aaa; font-weight:300; }
-  .nav-menu { display:flex; gap:36px; list-style:none; align-items:center; }
+  .nav-menu { display:flex; gap:8px; list-style:none; align-items:center; }
   .nav-menu a {
-    font-family:'IBM Plex Mono',monospace; font-size:0.85rem; letter-spacing:2px;
-    color:#ccc; text-decoration:none; transition:color 0.2s;
+    font-family:'IBM Plex Mono',monospace; font-size:0.78rem; letter-spacing:1px;
+    color:#ccc; text-decoration:none; transition:all 0.2s;
+    padding:7px 16px; border:1px solid #222; border-radius:4px;
   }
-  .nav-menu a:hover { color:var(--green); }
-  .nav-cta { background:var(--green)!important; color:#000!important; padding:10px 24px; font-weight:700!important; }
+  .nav-menu a:hover { color:var(--green); border-color:var(--green); background:rgba(0,255,136,0.05); }
+  .nav-menu a.active { color:var(--green); border-color:rgba(0,255,136,0.4); }
+  .nav-cta { background:var(--green)!important; color:#000!important; padding:8px 20px; font-weight:700!important; border:none!important; }
 
   /* HERO */
   .hero {
@@ -115,7 +117,8 @@
   .btn-ghost:hover { border-color:#666; color:var(--text); }
 
   /* PROBLEM */
-  .problem { padding:120px 48px; background:#050505; border-top:1px solid var(--border); }
+  .problem { padding:120px 48px; background:#05050a; border-top:1px solid var(--border); position:relative; }
+  .problem::before { content:""; position:absolute; inset:0; background:radial-gradient(ellipse at 80% 50%,rgba(255,50,50,0.03) 0%,transparent 60%); pointer-events:none; }
   .problem-inner { max-width:1000px; margin:0 auto; }
   .section-label {
     font-family:'IBM Plex Mono',monospace; font-size:0.7rem; letter-spacing:5px;
@@ -123,7 +126,7 @@
   }
   .section-title { font-size:clamp(1.8rem,3.5vw,2.8rem); font-weight:900; line-height:1.3; margin-bottom:20px; }
   .section-title em { color:var(--green); font-style:normal; }
-  .section-desc { font-size:1rem; color:#bbb; line-height:1.8; font-weight:300; max-width:640px; margin-bottom:56px; }
+  .section-desc { font-size:1rem; color:#ccc; line-height:1.8; font-weight:300; max-width:640px; margin-bottom:56px; }
   .problem-grid {
     display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
     gap:1px; background:var(--border); border:1px solid var(--border);
@@ -335,7 +338,7 @@
   .manifesto {
     padding:160px 48px; display:flex; justify-content:center;
     position:relative; overflow:hidden; border-top:1px solid var(--border);
-    background:#020d06;
+    background:#010a04;
   }
   .manifesto::before {
     content:''; position:absolute; inset:0;
@@ -350,7 +353,7 @@
   .manifesto-item::before { content:'—'; color:var(--green); }
 
   /* ROADMAP */
-  .roadmap { padding:100px 48px; background:#050505; border-top:1px solid var(--border); }
+  .roadmap { padding:100px 48px; background:#070707; border-top:1px solid var(--border); }
   .roadmap-inner { max-width:1000px; margin:0 auto; }
   .roadmap-steps { display:grid; grid-template-columns:repeat(5,1fr); gap:1px; background:var(--border); border:1px solid var(--border); margin-top:48px; }
   .roadmap-step { background:#0a0a0a; padding:28px 20px; position:relative; transition:background 0.3s; }
@@ -362,7 +365,7 @@
   .roadmap-step.on::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--green); }
   .step-num { font-family:'IBM Plex Mono',monospace; font-size:0.68rem; letter-spacing:2px; color:#777; margin-bottom:12px; }
   .step-name { font-size:0.95rem; font-weight:700; color:var(--text); margin-bottom:8px; }
-  .step-desc { font-size:0.82rem; color:#aaa; line-height:1.6; font-weight:300; }
+  .step-desc { font-size:0.85rem; color:#bbb; line-height:1.6; font-weight:300; }
   .step-badge { font-family:'IBM Plex Mono',monospace; font-size:0.62rem; letter-spacing:1px; margin-top:16px; display:inline-block; padding:4px 10px; }
   .badge-on { color:var(--green); border:1px solid rgba(0,255,136,0.25); }
   .badge-dev { color:#999; border:1px solid #333; }
@@ -422,11 +425,38 @@
   }
 
   /* 기능 이미지 섹션 */
-  .mobile-features { display:block; padding:100px 48px; background:#000; border-top:1px solid var(--border); }
+  .mobile-features { display:block; padding:100px 48px; background:#030a03; border-top:1px solid var(--border); }
   .mobile-features-inner { max-width:1000px; margin:0 auto; }
-  .mobile-img-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:48px; }
-  .mobile-img-grid img { width:100%; border-radius:12px; transition:transform 0.3s, box-shadow 0.3s; }
-  .mobile-img-grid img:hover { transform:translateY(-4px); box-shadow:0 16px 40px rgba(0,0,0,0.6); }
+  .feature-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:48px; }
+
+  /* 공통 기능 카드 */
+  .feat-card {
+    background:#0a0a0a; border:1px solid #1a1a1a;
+    border-radius:16px; overflow:hidden;
+    transition:border-color 0.3s, transform 0.3s;
+  }
+  .feat-card:hover { border-color:rgba(0,255,136,0.4); transform:translateY(-4px); }
+  .feat-header {
+    padding:16px 20px; border-bottom:1px solid #111;
+    display:flex; align-items:center; gap:10px;
+  }
+  .feat-icon { font-size:1.1rem; }
+  .feat-tag { font-family:'IBM Plex Mono',monospace; font-size:0.6rem; letter-spacing:3px; color:var(--green); }
+  .feat-title { font-size:0.85rem; font-weight:700; color:#fff; margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:0.58rem; color:#555; }
+  .feat-body { padding:20px; }
+  .feat-highlight {
+    background:#0a1f0a; border:1px solid rgba(0,255,136,0.2);
+    border-radius:10px; padding:14px 16px; margin-bottom:14px;
+    animation:pulse-feat 3s infinite;
+  }
+  @keyframes pulse-feat {
+    0%,100%{border-color:rgba(0,255,136,0.2);}
+    50%{border-color:rgba(0,255,136,0.5); box-shadow:0 0 12px rgba(0,255,136,0.08);}
+  }
+  .feat-hl-label { font-family:'IBM Plex Mono',monospace; font-size:0.55rem; letter-spacing:2px; color:var(--green); margin-bottom:6px; }
+  .feat-hl-text { font-size:0.9rem; font-weight:700; color:#fff; line-height:1.5; }
+  .feat-hl-sub { font-size:0.7rem; color:#aaa; margin-top:4px; }
+  .feat-desc { font-size:0.82rem; color:#bbb; line-height:1.7; font-weight:300; }
 
   @keyframes up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
   .reveal { opacity:0; transform:translateY(28px); transition:opacity 0.7s,transform 0.7s; }
@@ -452,6 +482,8 @@
     .manifesto{padding:60px 20px;} .manifesto-list{grid-template-columns:1fr;}
     .roadmap{padding:60px 20px;}
     .roadmap-steps{grid-template-columns:1fr;}
+    .feature-grid{grid-template-columns:1fr;}
+    .mobile-features{padding:60px 20px;}
     .mobile-img-grid{gap:12px;}
     .cta{padding:60px 20px;}
     .cta-title{font-size:clamp(1.6rem,6vw,2.4rem);}
@@ -507,30 +539,14 @@
   </div>
 </section>
 
-<!-- 핵심 기능 4 -->
-<section class="mobile-features">
-  <div class="mobile-features-inner">
-    <div class="section-label reveal">CORE FEATURES</div>
-    <h2 class="section-title reveal">라이더 HUD <em>핵심 기능 4</em></h2>
-    <div class="mobile-img-grid reveal">
-      <img src="stamp.png" alt="타임스탬프 증빙">
-      <img src="parking.png" alt="미로 주차장 탈출">
-      <img src="safety-img.png" alt="후면 단속 카메라">
-      <img src="pin.png" alt="GPS 핀 메모 TTS">
-    </div>
-  </div>
-</section>
-
 <!-- PROBLEM -->
 <section class="problem" id="problem">
   <div class="problem-inner">
     <div class="section-label reveal">THE PROBLEM</div>
     <h2 class="section-title reveal">라이더는 <em>데이터 없이</em> 일합니다</h2>
     <p class="section-desc reveal">
-      플랫폼은 라이더의 이동 경로, 처리 시간, 수락률을 모두 알고 있습니다.<br>
-      그러나 정작 라이더는 오늘 실질 시급이 얼마인지 모릅니다.<br>
-      유튜버는 자신의 경험을 팝니다. 선배는 감으로만 압니다.<br>
-      하루 10시간 운행 후 만신창이로 귀가하면 계획을 세울 에너지조차 없습니다.
+      플랫폼은 내 모든 데이터를 알고 있습니다.<br>
+      그러나 정작 나는 오늘 실질 시급조차 모릅니다.
     </p>
     <div class="problem-grid">
       <div class="problem-item reveal">
@@ -559,12 +575,92 @@
     <div class="section-label reveal">THE SOLUTION</div>
     <h2 class="section-title reveal"><em>내 데이터만이</em> 나의 답입니다</h2>
     <div class="solution-stmt reveal">
-      HUD는 운행 중 쌓이는 모든 경험을 <b>데이터로 기록</b>합니다.<br>
-      입력 부담은 최소화하고 <b>분석은 자동</b>으로 합니다.<br>
-      모든 데이터는 <b>내 기기에만 저장</b>됩니다.
+      기록은 자동.<br>
+      분석은 즉시.<br>
+      데이터는 <b>내 기기에만.</b>
     </div>
   </div>
 </section>
+
+<!-- 핵심 기능 4 -->
+<section class="mobile-features">
+  <div class="mobile-features-inner">
+    <div class="section-label reveal">CORE FEATURES</div>
+    <h2 class="section-title reveal">라이더 HUD <em>핵심 기능 4</em></h2>
+    <div class="feature-grid reveal">
+
+      <!-- 1. GPS 핀 메모 -->
+      <div class="feat-card">
+        <div class="feat-header">
+          <span class="feat-icon">📍</span>
+          <span class="feat-tag">GPS PIN MEMO</span>
+          <span class="feat-title">01/04</span>
+        </div>
+        <div class="feat-body">
+          <div class="feat-highlight">
+            <div class="feat-hl-label">🔊 근접 알림 · TTS 자동 안내</div>
+            <div class="feat-hl-text">공동현관 비밀번호<br>1 2 3 4 #</div>
+            <div class="feat-hl-sub">지하 B1 · 엘리베이터 좌측 → 102동</div>
+          </div>
+          <div class="feat-desc">저장된 장소에 가까워지면 자동으로 음성 안내. 헬멧 쓴 채로 들을 수 있습니다.</div>
+        </div>
+      </div>
+
+      <!-- 2. 배달 증빙 타임스탬프 -->
+      <div class="feat-card">
+        <div class="feat-header">
+          <span class="feat-icon">🛡️</span>
+          <span class="feat-tag">DROP STAMP</span>
+          <span class="feat-title">02/04</span>
+        </div>
+        <div class="feat-body">
+          <div class="feat-highlight">
+            <div class="feat-hl-label">📌 배달 완료 · 자동 기록</div>
+            <div class="feat-hl-text" style="font-size:0.78rem;">픽업: 2026.05.19 14:15<br>완료: 2026.05.19 14:28<br>좌표: 37.4498, 127.0276</div>
+            <div class="feat-hl-sub">48시간 보관 · 분쟁 시 증빙 자료</div>
+          </div>
+          <div class="feat-desc">"안 왔다"는 말에 시간과 위치로 답합니다. 드롭 버튼 하나로 자동 저장됩니다.</div>
+        </div>
+      </div>
+
+      <!-- 3. 후면 단속 카메라 -->
+      <div class="feat-card">
+        <div class="feat-header">
+          <span class="feat-icon">📷</span>
+          <span class="feat-tag">SAFETY ALERT</span>
+          <span class="feat-title">03/04</span>
+        </div>
+        <div class="feat-body">
+          <div class="feat-highlight" style="background:#1a0500; border-color:rgba(255,100,0,0.3); animation:none;">
+            <div class="feat-hl-label" style="color:#ff6600;">⚠️ 후면 단속 카메라 감지</div>
+            <div class="feat-hl-text">전방 200m · 속도 주의</div>
+            <div class="feat-hl-sub">제한속도 50km/h · TTS 음성 안내 중</div>
+          </div>
+          <div class="feat-desc">전국 17개 시도 단속 카메라 내장. 인터넷 없이도 작동합니다.</div>
+        </div>
+      </div>
+
+      <!-- 4. 미로 주차장 -->
+      <div class="feat-card">
+        <div class="feat-header">
+          <span class="feat-icon">🅿️</span>
+          <span class="feat-tag">PARKING GUIDE</span>
+          <span class="feat-title">04/04</span>
+        </div>
+        <div class="feat-body">
+          <div class="feat-highlight">
+            <div class="feat-hl-label">🔊 주차 위치 · TTS 안내</div>
+            <div class="feat-hl-text">B1층 Gate 4 근처</div>
+            <div class="feat-hl-sub">현재 위치: B3층 → 엘리베이터로 이동</div>
+          </div>
+          <div class="feat-desc">처음 가는 주차장도 걱정 없습니다. 층수·동선을 한 번 저장하면 자동 안내합니다.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
 
 <!-- MODULES -->
 <div id="modules">
@@ -600,13 +696,12 @@
       <div class="mod-num">01 / 03</div>
       <div class="mod-tag">HUD</div>
       <div class="mod-title">현장 기억<br>외부 두뇌</div>
-      <div class="mod-problem">"PIN 번호, 주차 구조, 위험 구간을 매번 몸으로 기억해야 합니다."</div>
-      <div class="mod-solution">근접 시 <b>자동 음성 안내</b>. 배달 사이클 <b>자동 추적</b>.</div>
+      <div class="mod-problem">"매번 인터폰. 매번 헤매는 주차장."</div>
+      <div class="mod-solution">가까워지면 자동 안내.<br>도착·픽업·드롭 사이클 자동 추적.</div>
       <div class="mod-features">
-        <div class="mod-feature">PIN · 출입 방식 · 층수 자동 안내</div>
-        <div class="mod-feature">도착 · 픽업 · 드롭 사이클 추적</div>
-        <div class="mod-feature">조리 대기 · 배달 시간 자동 기록</div>
-        <div class="mod-feature">위험 구간 · 주차 구조 메모</div>
+        <div class="mod-feature">PIN · 층수 자동 음성 안내</div>
+        <div class="mod-feature">배달 사이클 자동 추적</div>
+        <div class="mod-feature">드롭 스탬프 · 증빙 자동 기록</div>
       </div>
       <a href="hud.html" class="mod-link">상세 보기 →</a>
     </div>
@@ -653,13 +748,12 @@
       <div class="mod-num">02 / 03</div>
       <div class="mod-tag">MANAGER</div>
       <div class="mod-title">감이 아니라<br>숫자로</div>
-      <div class="mod-problem">"오늘 실질 시급이 얼마인지 퇴근 후에도 모릅니다."</div>
-      <div class="mod-solution">수입 입력 하나로 <b>실시급·공차율·플랫폼 비교</b> 자동 완성.</div>
+      <div class="mod-problem">"10시간 일했는데 실질 시급을 모릅니다."</div>
+      <div class="mod-solution">수입 입력 하나로<br><b>실시급·공차율·플랫폼 비교</b> 완성.</div>
       <div class="mod-features">
-        <div class="mod-feature">실질 시급 · 공차율 자동 계산</div>
+        <div class="mod-feature">실시급 · 공차율 자동 계산</div>
         <div class="mod-feature">플랫폼별 수익 비교</div>
-        <div class="mod-feature">미션 효율 분석</div>
-        <div class="mod-feature">주간 · 월간 · 연간 통계</div>
+        <div class="mod-feature">3초 정산 완료</div>
       </div>
       <a href="manager.html" class="mod-link">상세 보기 →</a>
     </div>
@@ -704,13 +798,12 @@
       <div class="mod-num">03 / 03</div>
       <div class="mod-tag">HEATMAP</div>
       <div class="mod-title">밤마다 지도를<br>연구하지 않아도</div>
-      <div class="mod-problem">"어디로 가야 할지 매일 감으로 결정합니다."</div>
-      <div class="mod-solution">내 운행 데이터가 <b>Hot Zone·시간대 전략</b>을 알려줍니다.</div>
+      <div class="mod-problem">"밤마다 지도 연구해도 답이 없습니다."</div>
+      <div class="mod-solution">내 데이터가<br><b>어디로 가야 할지</b> 알려줍니다.</div>
       <div class="mod-features">
-        <div class="mod-feature">픽업 · 드롭 밀집 구역 시각화</div>
+        <div class="mod-feature">Hot Zone · Ice Zone 시각화</div>
         <div class="mod-feature">요일 · 시간대별 전략 필터</div>
-        <div class="mod-feature">Hot Zone · Ice Zone 구분</div>
-        <div class="mod-feature">100건부터 데이터 축적 시작</div>
+        <div class="mod-feature">100건부터 전략 지도 완성</div>
       </div>
       <a href="heatmap.html" class="mod-link">상세 보기 →</a>
     </div>
@@ -722,7 +815,7 @@
 <section class="manifesto">
   <div class="manifesto-inner">
     <div class="manifesto-label reveal">DATA SOVEREIGNTY</div>
-    <blockquote class="manifesto-quote reveal">"개발자조차<br>당신의 데이터에<br>접근하지 못합니다."</blockquote>
+    <blockquote class="manifesto-quote reveal">"개발자조차<br>접근하지 못합니다."</blockquote>
     <div class="manifesto-list reveal">
       <div class="manifesto-item">☁️ 클라우드 강제 업로드 없음</div>
       <div class="manifesto-item">🖥️ 중앙 서버 없음</div>
